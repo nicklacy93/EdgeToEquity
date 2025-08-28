@@ -1,12 +1,12 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  BookOpen, 
-  MessageSquare, 
-  BarChart3, 
-  Zap, 
-  Brain, 
+import {
+  BookOpen,
+  MessageSquare,
+  BarChart3,
+  Zap,
+  Brain,
   Target,
   TrendingUp,
   Clock,
@@ -53,9 +53,22 @@ interface CommandCenterProps {
   currentMood?: 'confident' | 'cautious' | 'excited' | 'stressed';
 }
 
-export default function EnhancedQuickActionsPanel({ 
+interface ColorCfg {
+  gradient: string;
+  border: string;
+  hoverBorder: string;
+  shadow: string;
+  glowShadow: string;
+  iconBg: string;
+  iconColor: string;
+  badgeBg: string;
+  badgeText: string;
+  accent: string;
+}
+
+export default function EnhancedQuickActionsPanel({
   sessionMode = 'plan',
-  currentMood = 'confident' 
+  currentMood = 'confident'
 }: CommandCenterProps) {
   const [hoveredAction, setHoveredAction] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['recommended']));
@@ -98,7 +111,7 @@ export default function EnhancedQuickActionsPanel({
       title: 'Set Daily Intention',
       description: '🎯 Define your risk tolerance and profit goals',
       icon: Target,
-      color: 'purple',
+      color: 'brand',
       category: 'recommended',
       priority: 'high',
       psychologyNote: 'Clear intentions prevent overtrading',
@@ -152,7 +165,7 @@ export default function EnhancedQuickActionsPanel({
       title: 'Quick Backtest',
       description: '📈 Test strategy on recent market data',
       icon: TrendingUp,
-      color: 'purple',
+      color: 'blue',
       category: 'strategy',
       priority: 'low',
       timeEstimate: '5 min',
@@ -263,42 +276,30 @@ export default function EnhancedQuickActionsPanel({
     }
   ];
 
-  const colorConfigs = {
+  const colorConfigs: Record<string, ColorCfg> = {
     blue: {
-      gradient: 'from-blue-500/25 to-blue-400/12',
-      border: 'border-blue-500/40',
-      hoverBorder: 'hover:border-blue-400/70',
-      shadow: 'hover:shadow-blue-500/30',
-      glowShadow: 'hover:shadow-2xl hover:shadow-blue-500/20',
-      iconBg: 'bg-blue-500/25',
-      iconColor: 'text-blue-400',
-      badgeBg: 'bg-blue-500/25',
-      badgeText: 'text-blue-300',
-      accent: 'from-blue-500/60 to-blue-400/40'
+      gradient: 'from-[#2563eb]/25 to-[#2563eb]/12',
+      border: 'border-[#2563eb]/40',
+      hoverBorder: 'hover:border-[#2563eb]/70',
+      shadow: 'hover:drop-shadow-[0_0_24px_rgba(37,99,235,0.30)]',
+      glowShadow: 'hover:drop-shadow-[0_0_32px_rgba(37,99,235,0.20)]',
+      iconBg: 'bg-[#2563eb]/25',
+      iconColor: 'text-[#2563eb]',
+      badgeBg: 'bg-[#2563eb]/25',
+      badgeText: 'text-[#2563eb]',
+      accent: 'from-[#2563eb]/60 to-[#2563eb]/40'
     },
-    emerald: {
-      gradient: 'from-emerald-500/25 to-emerald-400/12',
-      border: 'border-emerald-500/40',
-      hoverBorder: 'hover:border-emerald-400/70',
-      shadow: 'hover:shadow-emerald-500/30',
-      glowShadow: 'hover:shadow-2xl hover:shadow-emerald-500/20',
-      iconBg: 'bg-emerald-500/25',
-      iconColor: 'text-emerald-400',
-      badgeBg: 'bg-emerald-500/25',
-      badgeText: 'text-emerald-300',
-      accent: 'from-emerald-500/60 to-emerald-400/40'
-    },
-    purple: {
-      gradient: 'from-purple-500/25 to-purple-400/12',
-      border: 'border-purple-500/40',
-      hoverBorder: 'hover:border-purple-400/70',
-      shadow: 'hover:shadow-purple-500/30',
-      glowShadow: 'hover:shadow-2xl hover:shadow-purple-500/20',
-      iconBg: 'bg-purple-500/25',
-      iconColor: 'text-purple-400',
-      badgeBg: 'bg-purple-500/25',
-      badgeText: 'text-purple-300',
-      accent: 'from-purple-500/60 to-purple-400/40'
+    brand: {
+      gradient: 'from-[#22c55e]/25 to-[#22c55e]/12',
+      border: 'border-[#22c55e]/40',
+      hoverBorder: 'hover:border-[#22c55e]/70',
+      shadow: 'hover:drop-shadow-[0_0_24px_rgba(34,197,94,0.30)]',
+      glowShadow: 'hover:drop-shadow-[0_0_32px_rgba(34,197,94,0.20)]',
+      iconBg: 'bg-[#22c55e]/25',
+      iconColor: 'text-[#22c55e]',
+      badgeBg: 'bg-[#22c55e]/25',
+      badgeText: 'text-[#22c55e]',
+      accent: 'from-[#22c55e]/60 to-[#22c55e]/40'
     },
     amber: {
       gradient: 'from-amber-500/25 to-amber-400/12',
@@ -350,6 +351,10 @@ export default function EnhancedQuickActionsPanel({
     }
   };
 
+  // Safety aliases to prevent runtime breaks
+  colorConfigs.purple = colorConfigs.brand;
+  colorConfigs.emerald = colorConfigs.brand;
+
   // Filter actions based on session mode and get recommendations
   const getFilteredActions = (category: string) => {
     return quickActions
@@ -363,7 +368,7 @@ export default function EnhancedQuickActionsPanel({
 
   const getRecommendedActions = () => {
     const baseRecommended = getFilteredActions('recommended');
-    
+
     // Add contextual recommendations based on mood/session
     const contextualActions = quickActions.filter(action => {
       if (currentMood === 'stressed' && action.id === 'breathing-exercise') return true;
@@ -403,7 +408,7 @@ export default function EnhancedQuickActionsPanel({
       title: 'Strategy Tools',
       subtitle: 'Market analysis & planning',
       icon: Target,
-      color: 'purple',
+      color: 'brand',
       actions: getFilteredActions('strategy')
     },
     {
@@ -435,13 +440,13 @@ export default function EnhancedQuickActionsPanel({
         key={action.id}
         initial={{ opacity: 0, y: 16, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ 
+        transition={{
           delay: index * 0.1,
           duration: 0.4,
           ease: [0.25, 0.46, 0.45, 0.94]
         }}
-        whileHover={{ 
-          scale: isCompact ? 1.02 : 1.03, 
+        whileHover={{
+          scale: isCompact ? 1.02 : 1.03,
           y: -2,
           transition: { duration: 0.2 }
         }}
@@ -466,7 +471,7 @@ export default function EnhancedQuickActionsPanel({
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            className="absolute top-3 right-3 w-6 h-6 bg-emerald-500/90 rounded-full flex items-center justify-center"
+            className="absolute top-3 right-3 w-6 h-6 bg-[#22c55e]/90 rounded-full flex items-center justify-center"
           >
             <CheckCircle2 className="w-4 h-4 text-white" />
           </motion.div>
@@ -478,7 +483,7 @@ export default function EnhancedQuickActionsPanel({
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: index * 0.1 + 0.5 }}
-            className="absolute -top-2 -right-2 flex items-center gap-1 px-2 py-1 bg-emerald-500/90 rounded-full shadow-lg"
+            className="absolute -top-2 -right-2 flex items-center gap-1 px-2 py-1 bg-[#22c55e]/90 rounded-full shadow-lg"
           >
             <Sparkles className="w-3 h-3 text-white" />
             <span className="text-xs text-white font-bold">NEW</span>
@@ -488,7 +493,7 @@ export default function EnhancedQuickActionsPanel({
         <div className="relative z-10">
           <div className={`flex items-start gap-${isCompact ? '3' : '4'} ${isCompact ? 'mb-2' : 'mb-4'}`}>
             {/* Enhanced icon */}
-            <motion.div 
+            <motion.div
               whileHover={{ scale: 1.15, rotate: 8 }}
               className={`
                 ${isCompact ? 'p-2' : 'p-3'} rounded-xl ${config.iconBg} backdrop-blur-sm shadow-lg
@@ -498,7 +503,7 @@ export default function EnhancedQuickActionsPanel({
             >
               <IconComponent className={`${isCompact ? 'w-5 h-5' : 'w-6 h-6'} ${config.iconColor} drop-shadow-sm`} />
             </motion.div>
-            
+
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
                 <h5 className={`${isCompact ? 'text-base' : 'text-lg'} font-bold text-white group-hover:text-blue-300 transition-colors`}>
@@ -513,11 +518,11 @@ export default function EnhancedQuickActionsPanel({
                   </span>
                 )}
               </div>
-              
+
               <p className={`${isCompact ? 'text-xs' : 'text-sm'} text-slate-300 leading-relaxed mb-2`}>
                 {action.description}
               </p>
-              
+
               {/* Time estimate */}
               <div className="flex items-center gap-2 text-xs text-slate-400">
                 <Clock className="w-3 h-3" />
@@ -530,7 +535,7 @@ export default function EnhancedQuickActionsPanel({
           {!isCompact && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
-              animate={{ 
+              animate={{
                 opacity: isHovered ? 1 : 0,
                 height: isHovered ? 'auto' : 0
               }}
@@ -552,7 +557,7 @@ export default function EnhancedQuickActionsPanel({
         </div>
 
         {/* Enhanced animated border accent */}
-        <motion.div 
+        <motion.div
           initial={{ scaleX: 0 }}
           whileHover={{ scaleX: 1 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
@@ -560,7 +565,7 @@ export default function EnhancedQuickActionsPanel({
             absolute inset-x-0 bottom-0 h-1 
             bg-gradient-to-r ${config.accent}
             origin-left rounded-b-2xl
-          `} 
+          `}
         />
       </motion.button>
     );
@@ -584,8 +589,8 @@ export default function EnhancedQuickActionsPanel({
           disabled={section.alwaysShow}
           className={`
             w-full flex items-center justify-between p-4 rounded-xl
-            ${section.alwaysShow 
-              ? 'bg-gradient-to-r from-emerald-500/20 to-emerald-400/10 border border-emerald-500/30' 
+            ${section.alwaysShow
+              ? 'bg-gradient-to-r from-emerald-500/20 to-emerald-400/10 border border-emerald-500/30'
               : 'bg-slate-800/50 hover:bg-slate-700/50 border border-slate-700/50'
             }
             transition-all duration-200
@@ -607,7 +612,7 @@ export default function EnhancedQuickActionsPanel({
               <p className="text-sm text-slate-400">{section.subtitle}</p>
             </div>
           </div>
-          
+
           {!section.alwaysShow && (
             <motion.div
               animate={{ rotate: isExpanded ? 180 : 0 }}
@@ -628,12 +633,11 @@ export default function EnhancedQuickActionsPanel({
               transition={{ duration: 0.3 }}
               className="overflow-hidden"
             >
-              <div className={`grid gap-4 ${
-                section.id === 'recommended' 
-                  ? 'grid-cols-1 lg:grid-cols-2' 
+              <div className={`grid gap-4 ${section.id === 'recommended'
+                  ? 'grid-cols-1 lg:grid-cols-2'
                   : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
-              }`}>
-                {section.actions.map((action: QuickAction, index: number) => 
+                }`}>
+                {section.actions.map((action: QuickAction, index: number) =>
                   renderActionCard(action, index, section.id !== 'recommended')
                 )}
               </div>
@@ -654,8 +658,8 @@ export default function EnhancedQuickActionsPanel({
       >
         <div>
           <h3 className="text-2xl font-bold text-white mb-2 flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl border border-blue-500/30">
-              <Zap className="w-6 h-6 text-blue-400" />
+            <div className="p-2 bg-gradient-to-r from-[#2563eb]/25 to-[#22c55e]/25 rounded-xl border border-[#2563eb]/30">
+              <Zap className="w-6 h-6 text-[#2563eb]" />
             </div>
             Command Center
           </h3>
@@ -665,7 +669,7 @@ export default function EnhancedQuickActionsPanel({
             <span className="text-emerald-400 font-medium">{sessionMode.toUpperCase()} mode</span>
           </p>
         </div>
-        
+
         <div className="flex items-center gap-3">
           <div className="text-right">
             <div className="text-lg font-bold text-white">{completedActions.size}</div>
@@ -695,8 +699,8 @@ export default function EnhancedQuickActionsPanel({
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-gradient-to-r from-emerald-500/20 to-blue-500/20 rounded-xl border border-emerald-500/30">
-              <Award className="w-6 h-6 text-emerald-400" />
+            <div className="p-3 bg-gradient-to-r from-[#22c55e]/20 to-[#2563eb]/20 rounded-xl border border-[#22c55e]/30">
+              <Award className="w-6 h-6 text-[#22c55e]" />
             </div>
             <div>
               <h5 className="text-lg font-bold text-white">
@@ -707,10 +711,10 @@ export default function EnhancedQuickActionsPanel({
               </p>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-emerald-400">{completedActions.size}</div>
+              <div className="text-2xl font-bold text-[#22c55e]">{completedActions.size}</div>
               <div className="text-xs text-slate-400">actions completed</div>
             </div>
             <div className="w-16 h-16 relative">
@@ -733,7 +737,7 @@ export default function EnhancedQuickActionsPanel({
                   fill="transparent"
                   strokeDasharray={`${2 * Math.PI * 28}`}
                   strokeDashoffset={`${2 * Math.PI * 28 * (1 - completedActions.size / 10)}`}
-                  className="text-emerald-400 transition-all duration-500"
+                  className="text-[#22c55e] transition-all duration-500"
                 />
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">

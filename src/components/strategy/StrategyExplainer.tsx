@@ -48,7 +48,7 @@ import {
   Sparkles
 } from 'lucide-react';
 
-const StrategyExplainer = ({ integratedMode = false, themeColor = "purple" }) => {
+const StrategyExplainer = ({ integratedMode = false, themeColor = "brand" }) => {
   const [isExplaining, setIsExplaining] = useState(false);
   const [explanation, setExplanation] = useState(null);
   const [selectedSection, setSelectedSection] = useState('overview');
@@ -381,9 +381,9 @@ plotshape(short_condition, style=shape.triangledown, location=location.abovebar,
   };
 
   const sections = [
-    { id: 'overview', title: 'Overview', icon: Eye, color: 'emerald' },
+    { id: 'overview', title: 'Overview', icon: Eye, color: 'brand' },
     { id: 'indicators', title: 'Indicators', icon: TrendingUp, color: 'blue' },
-    { id: 'logic', title: 'Trading Logic', icon: Brain, color: 'purple' },
+    { id: 'logic', title: 'Trading Logic', icon: Brain, color: 'brand' },
     { id: 'risk', title: 'Risk Management', icon: Shield, color: 'amber' },
     { id: 'strengths', title: 'Strengths', icon: Award, color: 'green' },
     { id: 'improvements', title: 'Improvements', icon: Lightbulb, color: 'yellow' }
@@ -397,14 +397,15 @@ plotshape(short_condition, style=shape.triangledown, location=location.abovebar,
   const getSectionColor = (sectionId) => {
     const section = sections.find(s => s.id === sectionId);
     const colors = {
-      emerald: 'text-emerald-400 bg-emerald-500/20 border-emerald-500/30',
-      blue: 'text-blue-400 bg-blue-500/20 border-blue-500/30',
-      purple: 'text-blue-400 bg-blue-500/20 border-blue-500/30',
+      brand: 'text-[#22c55e] bg-[#22c55e]/25 border-[#22c55e]/30',
+      blue: 'text-[#2563eb] bg-[#2563eb]/25 border-[#2563eb]/30',
+      // Back-compat alias
+      purple: 'text-[#22c55e] bg-[#22c55e]/25 border-[#22c55e]/30',
       amber: 'text-amber-400 bg-amber-500/20 border-amber-500/30',
       green: 'text-green-400 bg-green-500/20 border-green-500/30',
       yellow: 'text-yellow-400 bg-yellow-500/20 border-yellow-500/30'
     };
-    return colors[section?.color] || colors.purple;
+    return colors[section?.color] || colors.brand;
   };
 
   const getCurrentSectionIndex = () => {

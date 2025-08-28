@@ -194,7 +194,7 @@ const StrategyGenerator = () => {
             category: 'Trend',
             params: { period: 20 },
             icon: Target,
-            color: 'purple'
+            color: 'brand'
         },
         {
             id: 'ema',
@@ -1154,8 +1154,8 @@ plot(${selectedIndicators.find(i => i.name === 'EMA') ? `ema_${selectedIndicator
                             whileTap={{ scale: 0.9 }}
                             onClick={() => setShowHelpPanel(true)}
                             className={`fixed bottom-6 right-6 z-30 p-4 rounded-full shadow-lg transition-all ${isDarkMode
-                                ? 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700'
-                                : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700'} text-white`}
+                                ? 'bg-gradient-to-r from-[#2563eb] to-[#22c55e] hover:from-[#2563eb] hover:to-[#22c55e]'
+                                : 'bg-gradient-to-r from-[#2563eb] to-[#22c55e] hover:from-[#2563eb] hover:to-[#22c55e]'} text-white`}
                             title="Quick Help"
                         >
                             <motion.div

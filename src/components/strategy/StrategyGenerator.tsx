@@ -227,7 +227,7 @@ const StrategyGenerator = ({
             category: 'Trend',
             params: { period: 20 },
             icon: Target,
-            color: 'purple'
+            color: 'brand'
         },
         {
             id: 'ema',
@@ -236,7 +236,7 @@ const StrategyGenerator = ({
             category: 'Trend',
             params: { period: 21 },
             icon: Target,
-            color: 'amber'
+            color: 'blue'
         },
         {
             id: 'bollinger',
@@ -1064,7 +1064,7 @@ ${selectedIndicators.map(indicator => {
                     case 'Bollinger Bands':
                         return 'plot(bb_upper, "BB Upper", color=color.gray)\nplot(bb_lower, "BB Lower", color=color.gray)';
                     case 'VWAP':
-                        return 'plot(vwap_value, "VWAP", color=color.purple)';
+                        return 'plot(vwap_value, "VWAP", color=color.green)';
                     default:
                         return `// plot(${indicator.name.toLowerCase()}_value, "${indicator.name}", color=color.blue)`;
                 }
@@ -1309,7 +1309,7 @@ namespace NinjaTrader.NinjaScript.Strategies
                                     title: 'Breakout Strategy',
                                     description: 'Trade breakouts with volume and ATR',
                                     icon: Rocket,
-                                    color: 'purple'
+                                    color: 'brand'
                                 }
                             ].map((strategy) => {
                                 const IconComponent = strategy.icon;
@@ -2395,12 +2395,11 @@ const VisualBuilder = ({
                         >
                             <div className="flex items-center gap-3">
                                 <div className="flex items-center gap-2">
-                                    <indicator.icon className={`w-4 h-4 ${indicator.color === 'emerald' ? 'text-emerald-500' :
-                                        indicator.color === 'blue' ? 'text-blue-500' :
-                                            indicator.color === 'purple' ? 'text-blue-500' :
-                                                indicator.color === 'amber' ? 'text-amber-500' :
-                                                    indicator.color === 'cyan' ? 'text-cyan-500' :
-                                                        'text-red-500'
+                                    <indicator.icon className={`w-4 h-4 ${indicator.color === 'brand' ? 'text-[#22c55e]' :
+                                        indicator.color === 'blue' ? 'text-[#2563eb]' :
+                                            indicator.color === 'amber' ? 'text-amber-500' :
+                                                indicator.color === 'cyan' ? 'text-cyan-500' :
+                                                    'text-red-500'
                                         }`} />
                                     <Info className="w-3 h-3 text-slate-400 opacity-60" />
                                 </div>
@@ -2550,12 +2549,11 @@ const VisualBuilder = ({
                                 <div key={indicator.id} className={`p-4 rounded-lg border ${isDarkMode ? 'bg-slate-700/30 border-slate-600' : 'bg-gray-50 border-gray-200'}`}>
                                     {/* Indicator Header */}
                                     <div className="flex items-center gap-2 mb-4">
-                                        <indicator.icon className={`w-5 h-5 ${indicator.color === 'emerald' ? 'text-emerald-500' :
-                                            indicator.color === 'blue' ? 'text-blue-500' :
-                                                indicator.color === 'purple' ? 'text-blue-500' :
-                                                    indicator.color === 'amber' ? 'text-amber-500' :
-                                                        indicator.color === 'cyan' ? 'text-cyan-500' :
-                                                            'text-red-500'
+                                        <indicator.icon className={`w-5 h-5 ${indicator.color === 'brand' ? 'text-[#22c55e]' :
+                                            indicator.color === 'blue' ? 'text-[#2563eb]' :
+                                                indicator.color === 'amber' ? 'text-amber-500' :
+                                                    indicator.color === 'cyan' ? 'text-cyan-500' :
+                                                        'text-red-500'
                                             }`} />
                                         <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
                                             {indicator.name} Rules

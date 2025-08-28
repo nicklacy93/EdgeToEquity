@@ -155,9 +155,9 @@ const DashboardOverview = ({
     // Performance Metrics Calculations
     const calculateProgress = (current: number, target: number) => Math.min((current / target) * 100, 100);
     const getAchievementLevel = (streak: number) => {
-        if (streak >= 30) return { level: 'Master', color: 'text-purple-400', icon: '👑' };
-        if (streak >= 14) return { level: 'Expert', color: 'text-emerald-400', icon: '🏆' };
-        if (streak >= 7) return { level: 'Advanced', color: 'text-blue-400', icon: '⭐' };
+        if (streak >= 30) return { level: 'Master', color: 'text-[#22c55e]', icon: '👑' };
+        if (streak >= 14) return { level: 'Expert', color: 'text-[#22c55e]', icon: '🏆' };
+        if (streak >= 7) return { level: 'Advanced', color: 'text-[#2563eb]', icon: '⭐' };
         if (streak >= 3) return { level: 'Intermediate', color: 'text-amber-400', icon: '🔥' };
         return { level: 'Beginner', color: 'text-slate-400', icon: '🌱' };
     };
@@ -246,11 +246,11 @@ const DashboardOverview = ({
                         </div>
                     </div>
                     <div className="bg-white/5 rounded-xl p-4 border border-slate-700/50">
-                        <div className="text-2xl font-bold text-purple-400">{todayTimeSpent}</div>
+                        <div className="text-2xl font-bold text-[#22c55e]">{todayTimeSpent}</div>
                         <div className="text-sm text-slate-400 mb-2">Focus Time</div>
                         <div className="w-full bg-slate-700 rounded-full h-2">
                             <div
-                                className="bg-purple-400 h-2 rounded-full transition-all duration-500"
+                                className="bg-[#22c55e] h-2 rounded-full transition-all duration-500"
                                 style={{ width: `${Math.min((totalFocusTime / 60) * 10, 100)}%` }}
                             />
                         </div>
@@ -368,17 +368,17 @@ const DashboardOverview = ({
                         <button
                             data-tour-id="get-started"
                             onClick={onNavigateToStrategy}
-                            className="group relative bg-gradient-to-r from-purple-500/20 to-purple-400/10 border border-purple-400/30 rounded-2xl p-6 hover:from-purple-500/30 hover:to-purple-400/20 transition-all duration-300"
+                            className="group relative bg-gradient-to-r from-[#22c55e]/20 to-[#22c55e]/10 border border-[#22c55e]/30 rounded-2xl p-6 hover:from-[#22c55e]/30 hover:to-[#22c55e]/20 transition-all duration-300"
                         >
                             <div className="flex items-center gap-4">
-                                <div className="p-3 bg-purple-500/20 rounded-xl group-hover:bg-purple-500/30 transition-colors">
-                                    <Rocket className="w-8 h-8 text-purple-400" />
+                                <div className="p-3 bg-[#22c55e]/20 rounded-xl group-hover:bg-[#22c55e]/30 transition-colors">
+                                    <Rocket className="w-8 h-8 text-[#22c55e]" />
                                 </div>
                                 <div className="text-left">
                                     <h3 className="text-lg font-semibold text-[hsl(var(--text-main))]">Get Started</h3>
                                     <p className="text-slate-400">Create Your First Trading Strategy</p>
                                 </div>
-                                <ArrowRight className="w-5 h-5 text-purple-400 ml-auto group-hover:translate-x-1 transition-transform" />
+                                <ArrowRight className="w-5 h-5 text-[#22c55e] ml-auto group-hover:translate-x-1 transition-transform" />
                             </div>
                         </button>
                     )}
@@ -503,8 +503,8 @@ const EnhancedPhaseInterface = ({
                     icon: Brain,
                     title: "Analyze Your Journey",
                     description: "Extract insights from your wins, losses, and patterns",
-                    backgroundGradient: "from-purple-500/20 to-purple-400/10",
-                    borderColor: "border-purple-400/30"
+                    backgroundGradient: "from-[#22c55e]/20 to-[#22c55e]/10",
+                    borderColor: "border-[#22c55e]/30"
                 };
             case 'grow':
                 return {
@@ -846,7 +846,7 @@ const DashboardContent = () => {
                     suggestion: `You've been consistent for ${learningStreak} days. Let's analyze your patterns and extract insights.`,
                     action: "Review Progress",
                     priority: "medium",
-                    color: "purple",
+                    color: "brand",
                     phase: 'reflect',
                     nextPhase: 'grow'
                 };
