@@ -1,0 +1,1240 @@
+/* Strategy Doctor - Medical Professional Theme */
+/* Using medical blue color scheme for trustworthy, clinical feel */
+
+:root {
+    /* EdgeToEquity Brand Color Palette - Green & Blue Primary */
+    --edgetoequity-primary-green: #22c55e;
+    /* EdgeToEquity brand green */
+    --edgetoequity-primary-blue: #3b82f6;
+    /* EdgeToEquity brand blue */
+    --edgetoequity-accent-blue: #0ea5e9;
+    /* Medical blue accent */
+    --edgetoequity-danger-red: #ef4444;
+    /* High severity red */
+    --edgetoequity-warning-amber: #f59e0b;
+    /* Medium severity amber */
+
+    /* Strategy Doctor Theme - Based on EdgeToEquity Brand */
+    --strategy-doctor-primary: #1e293b;
+    /* Professional dark background */
+    --strategy-doctor-accent: var(--edgetoequity-primary-blue);
+    /* Brand blue */
+    --strategy-doctor-success: var(--edgetoequity-primary-green);
+    /* Brand green */
+    --strategy-doctor-text: #ffffff;
+    /* Pure white text */
+    --strategy-doctor-muted: #94a3b8;
+    /* Muted text */
+    --strategy-doctor-border: #334155;
+    /* Subtle borders */
+    --strategy-doctor-warning: var(--edgetoequity-warning-amber);
+    /* Warning amber */
+    --strategy-doctor-error: var(--edgetoequity-danger-red);
+    /* Error red */
+
+    /* Glass effect variants */
+    --strategy-doctor-glass: rgba(30, 41, 59, 0.85);
+    --strategy-doctor-glass-border: rgba(51, 65, 85, 0.6);
+}
+
+/* Strategy Doctor Header - Solid Professional Look */
+.strategy-doctor-header {
+    background: linear-gradient(135deg,
+            var(--strategy-doctor-primary) 0%,
+            #0f172a 100%);
+    border: 2px solid var(--strategy-doctor-border);
+    color: var(--strategy-doctor-text);
+    position: relative;
+    overflow: hidden;
+}
+
+.strategy-doctor-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(14, 165, 233, 0.1),
+            transparent);
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        left: -100%;
+    }
+
+    50% {
+        left: 100%;
+    }
+
+    100% {
+        left: 100%;
+    }
+}
+
+/* Stethoscope Icon Container */
+.strategy-doctor-icon {
+    background: linear-gradient(135deg,
+            var(--strategy-doctor-accent) 0%,
+            #0284c7 100%);
+    border: 2px solid rgba(14, 165, 233, 0.3);
+    box-shadow: 0 8px 32px rgba(14, 165, 233, 0.25);
+}
+
+/* Issues Container - Smooth Animations */
+.strategy-doctor-issues {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.strategy-doctor-issue-card {
+    opacity: 0;
+    transform: translateX(-20px);
+    animation: slideInLeft 0.4s ease-out forwards;
+}
+
+.strategy-doctor-issue-card:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.strategy-doctor-issue-card:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.strategy-doctor-issue-card:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.strategy-doctor-issue-card:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Issue Severity Colors - Premium UX Design */
+.issue-high {
+    background: linear-gradient(135deg,
+            rgba(239, 68, 68, 0.18) 0%,
+            rgba(239, 68, 68, 0.08) 100%) !important;
+    border: 2px solid rgba(239, 68, 68, 0.4) !important;
+    color: #ffffff !important;
+    box-shadow: 0 8px 24px rgba(239, 68, 68, 0.15) !important;
+}
+
+.issue-medium {
+    background: linear-gradient(135deg,
+            rgba(245, 158, 11, 0.18) 0%,
+            rgba(245, 158, 11, 0.08) 100%) !important;
+    border: 2px solid rgba(245, 158, 11, 0.4) !important;
+    color: #ffffff !important;
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.15) !important;
+}
+
+.issue-low {
+    background: linear-gradient(135deg,
+            rgba(100, 116, 139, 0.15) 0%,
+            rgba(100, 116, 139, 0.05) 100%) !important;
+    border: 2px solid rgba(100, 116, 139, 0.3) !important;
+    color: #ffffff !important;
+    box-shadow: 0 8px 24px rgba(100, 116, 139, 0.12) !important;
+}
+
+/* Expansion Animation */
+.strategy-doctor-expandable {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+}
+
+.strategy-doctor-expandable[data-expanded="true"] {
+    max-height: 1000px;
+    opacity: 1;
+}
+
+.strategy-doctor-expandable[data-expanded="false"] {
+    max-height: 0;
+    opacity: 0;
+}
+
+/* Health Status Indicator */
+.strategy-health-excellent {
+    color: var(--strategy-doctor-success);
+}
+
+.strategy-health-good {
+    color: var(--strategy-doctor-accent);
+}
+
+.strategy-health-attention {
+    color: var(--strategy-doctor-warning);
+}
+
+.strategy-health-critical {
+    color: var(--strategy-doctor-error);
+}
+
+/* Severity Filter Buttons - High Specificity */
+.strategy-doctor-filter-btn {
+    background: linear-gradient(135deg,
+            var(--strategy-doctor-primary) 0%,
+            rgba(30, 41, 59, 0.8) 100%) !important;
+    border: 2px solid var(--strategy-doctor-border) !important;
+    color: var(--strategy-doctor-muted) !important;
+    transition: all 0.3s ease !important;
+    font-weight: 600 !important;
+}
+
+.strategy-doctor-filter-btn:hover {
+    border-color: var(--strategy-doctor-accent) !important;
+    color: var(--strategy-doctor-text) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 25px rgba(14, 165, 233, 0.2) !important;
+}
+
+.strategy-doctor-filter-btn.active {
+    background: linear-gradient(135deg,
+            var(--strategy-doctor-accent) 0%,
+            #0284c7 100%) !important;
+    border-color: var(--strategy-doctor-accent) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 20px rgba(14, 165, 233, 0.4) !important;
+}
+
+/* Severity Badges */
+.strategy-doctor-severity-badge {
+    font-weight: 700;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    border-width: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.strategy-doctor-severity-high {
+    background: var(--strategy-doctor-error) !important;
+    color: #ffffff !important;
+    border-color: #dc2626 !important;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4) !important;
+    font-weight: 800 !important;
+}
+
+.strategy-doctor-severity-medium {
+    background: var(--strategy-doctor-warning) !important;
+    color: #ffffff !important;
+    border-color: #d97706 !important;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4) !important;
+    font-weight: 800 !important;
+}
+
+.strategy-doctor-severity-low {
+    background: #64748b !important;
+    color: #ffffff !important;
+    border-color: #475569 !important;
+    box-shadow: 0 2px 8px rgba(100, 116, 139, 0.4) !important;
+    font-weight: 800 !important;
+}
+
+/* Action Buttons */
+.strategy-doctor-action-btn {
+    background: linear-gradient(135deg,
+            var(--strategy-doctor-primary) 0%,
+            rgba(30, 41, 59, 0.9) 100%);
+    border: 2px solid var(--strategy-doctor-border);
+    color: var(--strategy-doctor-text);
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.strategy-doctor-action-btn:hover {
+    border-color: var(--strategy-doctor-accent);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(14, 165, 233, 0.2);
+}
+
+.strategy-doctor-action-btn.primary {
+    background: linear-gradient(135deg,
+            var(--strategy-doctor-accent) 0%,
+            #0284c7 100%);
+    border-color: var(--strategy-doctor-accent);
+    color: #ffffff;
+}
+
+.strategy-doctor-action-btn.primary:hover {
+    box-shadow: 0 6px 25px rgba(14, 165, 233, 0.4);
+}
+
+.strategy-doctor-action-btn.success {
+    background: linear-gradient(135deg,
+            var(--strategy-doctor-success) 0%,
+            #059669 100%);
+    border-color: var(--strategy-doctor-success);
+    color: #ffffff;
+}
+
+.strategy-doctor-action-btn.success:hover {
+    box-shadow: 0 6px 25px rgba(16, 185, 129, 0.4);
+}
+
+/* Code Display Areas */
+.strategy-doctor-code-display {
+    background: linear-gradient(135deg,
+            rgba(15, 23, 42, 0.95) 0%,
+            rgba(30, 41, 59, 0.95) 100%);
+    border: 2px solid var(--strategy-doctor-border);
+    color: var(--strategy-doctor-text);
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+}
+
+.strategy-doctor-code-display:focus {
+    border-color: var(--strategy-doctor-accent);
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+}
+
+/* Health Dashboard */
+.strategy-doctor-health-card {
+    background: linear-gradient(135deg,
+            var(--strategy-doctor-primary) 0%,
+            rgba(30, 41, 59, 0.95) 100%) !important;
+    border: 2px solid var(--strategy-doctor-border) !important;
+    color: var(--strategy-doctor-text) !important;
+    box-shadow: 0 8px 32px rgba(14, 165, 233, 0.15) !important;
+}
+
+/* Improvements Section Enhancement */
+.strategy-doctor-improvements-header {
+    color: var(--strategy-doctor-text) !important;
+}
+
+.strategy-doctor-improvements-badge {
+    background: linear-gradient(135deg,
+            var(--strategy-doctor-success) 0%,
+            #059669 100%) !important;
+    color: #ffffff !important;
+    border: 2px solid var(--strategy-doctor-success) !important;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3) !important;
+}
+
+/* Pulse Animation for Running Diagnosis */
+.strategy-doctor-analyzing {
+    position: relative;
+}
+
+.strategy-doctor-analyzing::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border: 2px solid var(--strategy-doctor-accent);
+    border-radius: inherit;
+    animation: pulse-border 2s ease-in-out infinite;
+}
+
+@keyframes pulse-border {
+
+    0%,
+    100% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.02);
+    }
+}
+
+/* Button Hover Effects */
+.strategy-doctor-btn {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.strategy-doctor-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            transparent 100%);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.strategy-doctor-btn:hover::before {
+    opacity: 1;
+}
+
+.strategy-doctor-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 25px rgba(14, 165, 233, 0.25);
+}
+
+/* Success Animation */
+.strategy-doctor-success-modal {
+    background: var(--strategy-doctor-glass);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--strategy-doctor-glass-border);
+}
+
+.strategy-doctor-success-icon {
+    animation: success-bounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes success-bounce {
+    0% {
+        transform: scale(0) rotate(-180deg);
+        opacity: 0;
+    }
+
+    60% {
+        transform: scale(1.1) rotate(10deg);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+/* Light Theme Overrides - EdgeToEquity Brand Colors */
+[data-theme="light"] {
+    --strategy-doctor-primary: #ffffff;
+    /* Pure white background */
+    --strategy-doctor-accent: var(--edgetoequity-primary-blue);
+    /* EdgeToEquity brand blue */
+    --strategy-doctor-success: var(--edgetoequity-primary-green);
+    /* EdgeToEquity brand green */
+    --strategy-doctor-text: #1f2937;
+    /* Very dark grey for excellent readability */
+    --strategy-doctor-muted: #374151;
+    /* Dark grey for readable text */
+    --strategy-doctor-border: #d1d5db;
+    /* Light grey borders */
+    --strategy-doctor-warning: #d97706;
+    /* Darker orange for light mode */
+    --strategy-doctor-error: var(--edgetoequity-danger-red);
+    /* Brand red for errors */
+    --strategy-doctor-glass: rgba(255, 255, 255, 0.95);
+    --strategy-doctor-glass-border: rgba(209, 213, 219, 0.8);
+
+    /* Light theme specific colors */
+    --strategy-doctor-light-card: #f8fafc;
+    /* Very light background - lighter than previous */
+    --strategy-doctor-light-text: #1f2937;
+    /* Dark text for readability */
+    --strategy-doctor-card-bg: #ffffff;
+    /* Pure white for cards */
+    --strategy-doctor-secondary-bg: #f1f5f9;
+    /* Light background for secondary elements */
+}
+
+[data-theme="light"] .strategy-doctor-header {
+    background: linear-gradient(135deg,
+            var(--strategy-doctor-primary) 0%,
+            #e2e8f0 100%);
+    box-shadow: 0 4px 24px rgba(3, 105, 161, 0.1);
+}
+
+[data-theme="light"] .strategy-doctor-icon {
+    background: linear-gradient(135deg,
+            var(--strategy-doctor-accent) 0%,
+            #0284c7 100%);
+    box-shadow: 0 8px 32px rgba(3, 105, 161, 0.2);
+}
+
+[data-theme="light"] .issue-high {
+    background: linear-gradient(135deg,
+            rgba(239, 68, 68, 0.08) 0%,
+            rgba(239, 68, 68, 0.03) 100%);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #dc2626;
+}
+
+[data-theme="light"] .issue-medium {
+    background: linear-gradient(135deg,
+            rgba(245, 158, 11, 0.08) 0%,
+            rgba(245, 158, 11, 0.03) 100%);
+    border-color: rgba(245, 158, 11, 0.3);
+    color: #d97706;
+}
+
+[data-theme="light"] .issue-low {
+    background: linear-gradient(135deg,
+            rgba(100, 116, 139, 0.08) 0%,
+            rgba(100, 116, 139, 0.03) 100%) !important;
+    border: 2px solid rgba(100, 116, 139, 0.25) !important;
+    color: #475569 !important;
+    box-shadow: 0 4px 16px rgba(100, 116, 139, 0.1) !important;
+}
+
+/* Light Theme Enhancement Suggestions - Bluish Grey */
+[data-theme="light"] .strategy-doctor-health-card {
+    background: linear-gradient(135deg,
+            var(--strategy-doctor-light-card) 0%,
+            #e2e8f0 100%) !important;
+    border: 2px solid #cbd5e1 !important;
+    color: var(--strategy-doctor-light-text) !important;
+    box-shadow: 0 4px 16px rgba(3, 105, 161, 0.08) !important;
+}
+
+/* Light Theme Text Visibility Fixes */
+[data-theme="light"] .strategy-doctor-improvements-header {
+    color: var(--strategy-doctor-text) !important;
+}
+
+[data-theme="light"] .strategy-doctor-improvements-badge {
+    background: var(--strategy-doctor-accent) !important;
+    color: #ffffff !important;
+    border: 2px solid var(--strategy-doctor-accent) !important;
+}
+
+/* Light Theme Action Buttons */
+[data-theme="light"] .strategy-doctor-action-btn {
+    background: linear-gradient(135deg,
+            #ffffff 0%,
+            #f8fafc 100%) !important;
+    border: 2px solid #d1d5db !important;
+    color: var(--strategy-doctor-light-text) !important;
+}
+
+[data-theme="light"] .strategy-doctor-action-btn:hover {
+    border-color: var(--strategy-doctor-accent) !important;
+    color: var(--strategy-doctor-accent) !important;
+}
+
+[data-theme="light"] .strategy-doctor-action-btn.primary {
+    background: var(--strategy-doctor-accent) !important;
+    color: #ffffff !important;
+    border-color: var(--strategy-doctor-accent) !important;
+}
+
+/* Light Theme Code Display */
+[data-theme="light"] .strategy-doctor-code-display {
+    background: #f1f5f9 !important;
+    border: 2px solid #cbd5e1 !important;
+    color: var(--strategy-doctor-light-text) !important;
+}
+
+/* Light Theme Filter Buttons */
+[data-theme="light"] .strategy-doctor-filter-btn {
+    background: linear-gradient(135deg,
+            #ffffff 0%,
+            #f8fafc 100%) !important;
+    border: 2px solid #d1d5db !important;
+    color: var(--strategy-doctor-muted) !important;
+}
+
+[data-theme="light"] .strategy-doctor-filter-btn:hover {
+    border-color: var(--strategy-doctor-accent) !important;
+    color: var(--strategy-doctor-accent) !important;
+}
+
+[data-theme="light"] .strategy-doctor-filter-btn.active {
+    background: var(--strategy-doctor-accent) !important;
+    color: #ffffff !important;
+    border-color: var(--strategy-doctor-accent) !important;
+}
+
+/* Light Theme "Why This Helps" Section */
+[data-theme="light"] .strategy-doctor-why-helps {
+    background: linear-gradient(135deg,
+            rgba(3, 105, 161, 0.05) 0%,
+            rgba(59, 130, 246, 0.05) 100%) !important;
+    border: 1px solid rgba(3, 105, 161, 0.2) !important;
+}
+
+[data-theme="light"] .strategy-doctor-why-helps-title {
+    color: var(--strategy-doctor-accent) !important;
+}
+
+[data-theme="light"] .strategy-doctor-why-helps-text {
+    color: var(--strategy-doctor-muted) !important;
+}
+
+/* Light Theme Doctor's Diagnosis Section */
+[data-theme="light"] .strategy-doctor-diagnosis-title {
+    color: var(--strategy-doctor-text) !important;
+}
+
+[data-theme="light"] .strategy-doctor-heart-icon {
+    color: #ec4899 !important;
+}
+
+[data-theme="light"] .strategy-doctor-diagnosis-content {
+    color: var(--strategy-doctor-light-text) !important;
+}
+
+[data-theme="light"] .strategy-doctor-diagnosis-good {
+    color: var(--strategy-doctor-accent) !important;
+}
+
+[data-theme="light"] .strategy-doctor-diagnosis-priority {
+    color: var(--strategy-doctor-warning) !important;
+}
+
+[data-theme="light"] .strategy-doctor-diagnosis-prognosis {
+    color: var(--strategy-doctor-success) !important;
+}
+
+/* Light Theme Treatment Plan */
+[data-theme="light"] .strategy-doctor-treatment-plan {
+    background: linear-gradient(135deg,
+            var(--strategy-doctor-light-card) 0%,
+            #e2e8f0 100%) !important;
+    border: 2px solid #cbd5e1 !important;
+}
+
+[data-theme="light"] .strategy-doctor-check-icon {
+    color: var(--strategy-doctor-success) !important;
+}
+
+[data-theme="light"] .strategy-doctor-treatment-title {
+    color: var(--strategy-doctor-success) !important;
+}
+
+[data-theme="light"] .strategy-doctor-treatment-item {
+    color: var(--strategy-doctor-light-text) !important;
+}
+
+/* Dark Theme Styles for New Classes */
+.strategy-doctor-why-helps {
+    background: linear-gradient(135deg,
+            rgba(59, 130, 246, 0.15) 0%,
+            rgba(59, 130, 246, 0.15) 100%);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.strategy-doctor-why-helps-title {
+    color: var(--strategy-doctor-accent);
+    font-size: 0.875rem !important;
+    /* Larger font size for better visibility */
+    font-weight: 600 !important;
+}
+
+.strategy-doctor-why-helps-text {
+    color: var(--strategy-doctor-muted);
+    font-size: 0.8125rem !important;
+    /* Slightly larger text */
+}
+
+/* Enhancement Suggestions Difficulty Badges - Green Theme */
+.strategy-doctor-difficulty-easy {
+    background: var(--strategy-doctor-success) !important;
+    color: #ffffff !important;
+    border: 2px solid var(--strategy-doctor-success) !important;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3) !important;
+    font-weight: 700 !important;
+}
+
+.strategy-doctor-difficulty-medium {
+    background: var(--strategy-doctor-success) !important;
+    color: #ffffff !important;
+    border: 2px solid var(--strategy-doctor-success) !important;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3) !important;
+    font-weight: 700 !important;
+}
+
+.strategy-doctor-difficulty-advanced {
+    background: var(--strategy-doctor-success) !important;
+    color: #ffffff !important;
+    border: 2px solid var(--strategy-doctor-success) !important;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3) !important;
+    font-weight: 700 !important;
+}
+
+/* Doctor's Diagnosis Typography Enhancement */
+.strategy-doctor-diagnosis-title {
+    font-size: 1.375rem !important;
+    /* Larger title */
+    font-weight: 700 !important;
+}
+
+.strategy-doctor-treatment-title {
+    font-size: 1rem !important;
+    /* Larger treatment plan title */
+    font-weight: 600 !important;
+}
+
+/* 10/10 Polish - Micro-interactions */
+.strategy-doctor-severity-badge {
+    transition: all 0.2s ease;
+}
+
+.strategy-doctor-severity-badge:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.1);
+}
+
+.strategy-doctor-action-btn {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.strategy-doctor-action-btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.05);
+}
+
+/* Professional Spacing and Layout */
+.strategy-doctor-issue-card {
+    transition: all 0.3s ease;
+}
+
+.strategy-doctor-issue-card:hover {
+    transform: translateY(-1px);
+}
+
+/* Light theme enhancements */
+[data-theme="light"] .strategy-doctor-difficulty-easy,
+[data-theme="light"] .strategy-doctor-difficulty-medium,
+[data-theme="light"] .strategy-doctor-difficulty-advanced {
+    background: var(--strategy-doctor-success) !important;
+    color: #ffffff !important;
+    border: 2px solid var(--strategy-doctor-success) !important;
+}
+
+[data-theme="light"] .issue-low {
+    background: linear-gradient(135deg,
+            rgba(100, 116, 139, 0.08) 0%,
+            rgba(100, 116, 139, 0.03) 100%) !important;
+    border: 2px solid rgba(100, 116, 139, 0.25) !important;
+    color: #475569 !important;
+    box-shadow: 0 4px 16px rgba(100, 116, 139, 0.1) !important;
+}
+
+.strategy-doctor-diagnosis-title {
+    color: var(--strategy-doctor-text);
+}
+
+.strategy-doctor-heart-icon {
+    color: #f472b6;
+}
+
+.strategy-doctor-diagnosis-content {
+    color: var(--strategy-doctor-muted);
+}
+
+.strategy-doctor-diagnosis-good {
+    color: #60a5fa;
+}
+
+.strategy-doctor-diagnosis-priority {
+    color: #fbbf24;
+}
+
+.strategy-doctor-diagnosis-prognosis {
+    color: #34d399;
+}
+
+.strategy-doctor-treatment-plan {
+    background: linear-gradient(135deg,
+            var(--strategy-doctor-primary) 0%,
+            rgba(30, 41, 59, 0.8) 100%);
+    border: 2px solid var(--strategy-doctor-border);
+}
+
+.strategy-doctor-check-icon {
+    color: #10b981;
+}
+
+.strategy-doctor-treatment-title {
+    color: #34d399;
+}
+
+.strategy-doctor-treatment-item {
+    color: var(--strategy-doctor-muted);
+}
+
+/* Light Theme Section Titles */
+[data-theme="light"] .strategy-doctor-section-title {
+    color: var(--strategy-doctor-text) !important;
+}
+
+/* Strategy Health Card - Blue Theme */
+.strategy-doctor-needs-attention {
+    color: var(--strategy-doctor-accent) !important;
+}
+
+.strategy-doctor-medium-risk {
+    color: var(--strategy-doctor-accent) !important;
+}
+
+.strategy-doctor-risk-level {
+    color: var(--strategy-doctor-text) !important;
+}
+
+.strategy-doctor-score {
+    color: var(--strategy-doctor-muted) !important;
+}
+
+/* Progress Bar - Blue Theme */
+.strategy-doctor-progress-bar {
+    background: var(--strategy-doctor-accent) !important;
+}
+
+/* Issues Found Title */
+.strategy-doctor-issues-title {
+    color: var(--strategy-doctor-text) !important;
+}
+
+[data-theme="light"] .strategy-doctor-issues-title {
+    color: var(--strategy-doctor-text) !important;
+}
+
+/* Issue Card Titles */
+.strategy-doctor-issue-title {
+    color: var(--strategy-doctor-text) !important;
+}
+
+[data-theme="light"] .strategy-doctor-issue-title {
+    color: var(--strategy-doctor-text) !important;
+}
+
+/* Issue Descriptions */
+.strategy-doctor-issue-description {
+    color: var(--strategy-doctor-muted) !important;
+}
+
+[data-theme="light"] .strategy-doctor-issue-description {
+    color: var(--strategy-doctor-light-text) !important;
+}
+
+/* Dr. EdgeBot Explains */
+.strategy-doctor-edgebot-explains {
+    color: var(--strategy-doctor-muted) !important;
+}
+
+[data-theme="light"] .strategy-doctor-edgebot-explains {
+    color: var(--strategy-doctor-light-text) !important;
+}
+
+/* Run Diagnosis Button - Outside Code Area */
+.strategy-doctor-run-diagnosis {
+    background: var(--strategy-doctor-accent) !important;
+    color: #ffffff !important;
+    border: 2px solid var(--strategy-doctor-accent) !important;
+    font-weight: 600 !important;
+}
+
+[data-theme="light"] .strategy-doctor-run-diagnosis {
+    background: var(--strategy-doctor-accent) !important;
+    color: #ffffff !important;
+    border: 2px solid var(--strategy-doctor-accent) !important;
+}
+
+/* Remove Scrollbar */
+.strategy-doctor-code-display {
+    scrollbar-width: none !important;
+    /* Firefox */
+    -ms-overflow-style: none !important;
+    /* Internet Explorer 10+ */
+}
+
+.strategy-doctor-code-display::-webkit-scrollbar {
+    display: none !important;
+    /* WebKit */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .strategy-doctor-header {
+        padding: 1rem;
+    }
+
+    .strategy-doctor-issues {
+        margin-top: 1rem;
+    }
+
+    .strategy-doctor-issue-card {
+        margin-bottom: 0.75rem;
+    }
+}
+
+/* FINAL 10/10 UX POLISH - Perfect Visibility */
+
+/* Enhanced Summary Cards - Better Contrast */
+[data-theme="light"] .bg-red-500\/15 {
+    background: rgba(239, 68, 68, 0.08) !important;
+}
+
+[data-theme="light"] .bg-amber-500\/15 {
+    background: rgba(245, 158, 11, 0.08) !important;
+}
+
+[data-theme="light"] .bg-blue-500\/15 {
+    background: rgba(59, 130, 246, 0.08) !important;
+}
+
+[data-theme="light"] .bg-emerald-500\/15 {
+    background: rgba(34, 197, 94, 0.08) !important;
+}
+
+/* Light theme text improvements */
+[data-theme="light"] .text-red-300,
+[data-theme="light"] .text-red-200 {
+    color: #dc2626 !important;
+}
+
+[data-theme="light"] .text-amber-300,
+[data-theme="light"] .text-amber-200 {
+    color: #d97706 !important;
+}
+
+[data-theme="light"] .text-blue-300,
+[data-theme="light"] .text-blue-200 {
+    color: #2563eb !important;
+}
+
+[data-theme="light"] .text-emerald-300,
+[data-theme="light"] .text-emerald-200 {
+    color: #059669 !important;
+}
+
+/* Perfect Contrast for All Elements */
+.strategy-doctor-filter-btn {
+    font-weight: 600 !important;
+}
+
+/* History and Help button enhancements */
+.history-help-buttons button {
+    font-weight: 600 !important;
+    color: #ffffff !important;
+}
+
+/* Enhanced Focus States for Accessibility */
+.strategy-doctor-filter-btn:focus,
+.strategy-doctor-action-btn:focus {
+    outline: 2px solid var(--strategy-doctor-accent);
+    outline-offset: 2px;
+}
+
+/* Text Readability Enhancements */
+.strategy-doctor-section-title {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+[data-theme="light"] .strategy-doctor-section-title {
+    color: #1e293b !important;
+}
+
+/* Final Polish - Smooth Animations */
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.strategy-doctor-card {
+    will-change: transform;
+}
+
+/* Perfect Spacing and Typography Hierarchy */
+.strategy-doctor-filter-text {
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    color: #ffffff !important;
+}
+
+[data-theme="light"] .strategy-doctor-filter-text {
+    color: #1e293b !important;
+}
+
+/* Premium Loading States */
+.strategy-doctor-analyzing {
+    backdrop-filter: blur(10px);
+}
+
+/* Final Accessibility Improvements */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Light Theme - Lighten Dark Boxes and Improve Text Contrast */
+[data-theme="light"] .bg-slate-800\/50,
+[data-theme="light"] .bg-slate-800,
+[data-theme="light"] .bg-slate-700\/50,
+[data-theme="light"] .bg-slate-700 {
+    background: var(--strategy-doctor-card-bg) !important;
+    border-color: var(--strategy-doctor-border) !important;
+}
+
+[data-theme="light"] .bg-slate-900,
+[data-theme="light"] .bg-slate-900\/50 {
+    background: var(--strategy-doctor-secondary-bg) !important;
+    border-color: var(--strategy-doctor-border) !important;
+}
+
+/* Light Theme - Fix Text Colors for Better Readability */
+[data-theme="light"] .text-white {
+    color: var(--strategy-doctor-text) !important;
+}
+
+[data-theme="light"] .text-slate-300,
+[data-theme="light"] .text-slate-200,
+[data-theme="light"] .text-slate-100 {
+    color: var(--strategy-doctor-light-text) !important;
+}
+
+[data-theme="light"] .text-slate-400,
+[data-theme="light"] .text-slate-500 {
+    color: var(--strategy-doctor-muted) !important;
+}
+
+/* Light Theme - Card Backgrounds */
+[data-theme="light"] .bg-gradient-to-r.from-emerald-500\/15,
+[data-theme="light"] .bg-emerald-500\/15 {
+    background: rgba(34, 197, 94, 0.05) !important;
+}
+
+/* Light Theme - Border Colors */
+[data-theme="light"] .border-slate-700,
+[data-theme="light"] .border-slate-600,
+[data-theme="light"] .border-slate-500 {
+    border-color: var(--strategy-doctor-border) !important;
+}
+
+/* Light Theme - Button and Interactive Elements */
+[data-theme="light"] .hover\:bg-slate-700\/50:hover,
+[data-theme="light"] .hover\:bg-slate-700:hover {
+    background: var(--strategy-doctor-secondary-bg) !important;
+}
+
+/* Light Theme - Code and Pre Elements */
+[data-theme="light"] pre {
+    background: var(--strategy-doctor-secondary-bg) !important;
+    color: var(--strategy-doctor-text) !important;
+    border-color: var(--strategy-doctor-border) !important;
+}
+
+/* Light Theme - Placeholder Text */
+[data-theme="light"] .placeholder-slate-400::placeholder {
+    color: #6b7280 !important;
+}
+
+/* Strategy Generator Layout Enhancements */
+.strategy-architect-header {
+    background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+    border: 2px solid rgba(34, 197, 94, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.strategy-architect-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(34, 197, 94, 0.15),
+            transparent);
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+[data-theme="light"] .strategy-architect-header {
+    background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%) !important;
+    border: 2px solid rgba(34, 197, 94, 0.2) !important;
+}
+
+.strategy-architect-title {
+    color: #ffffff;
+    font-weight: 700;
+}
+
+[data-theme="light"] .strategy-architect-title {
+    color: var(--strategy-doctor-text) !important;
+}
+
+.strategy-architect-subtitle {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+[data-theme="light"] .strategy-architect-subtitle {
+    color: var(--strategy-doctor-muted) !important;
+}
+
+/* Strategy Generator Grid Layout - Responsive */
+@media (min-width: 1024px) {
+    .strategy-generator-grid {
+        display: grid;
+        grid-template-columns: 3fr 2fr;
+        gap: 2rem;
+    }
+}
+
+/* Light Theme - Tab Buttons */
+[data-theme="light"] .bg-gray-100 {
+    background: #f8fafc !important;
+    border-color: #e2e8f0 !important;
+}
+
+[data-theme="light"] .bg-emerald-100 {
+    background: rgba(34, 197, 94, 0.1) !important;
+    border-color: rgba(34, 197, 94, 0.2) !important;
+}
+
+[data-theme="light"] .bg-blue-100 {
+    background: rgba(59, 130, 246, 0.1) !important;
+    border-color: rgba(59, 130, 246, 0.2) !important;
+}
+
+[data-theme="light"] .text-emerald-700 {
+    color: #047857 !important;
+}
+
+[data-theme="light"] .text-blue-700 {
+    color: #1d4ed8 !important;
+}
+
+[data-theme="light"] .text-blue-700 {
+    color: #1d4ed8 !important;
+}
+
+/* Enhanced Card Styles for Better Contrast */
+[data-theme="light"] .shadow-sm {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Light Theme - Improve Template Selection Cards */
+[data-theme="light"] .bg-white {
+    background: #ffffff !important;
+    border-color: #e5e7eb !important;
+}
+
+[data-theme="light"] .hover\:bg-emerald-50:hover {
+    background: rgba(34, 197, 94, 0.05) !important;
+}
+
+[data-theme="light"] .hover\:bg-blue-50:hover {
+    background: rgba(59, 130, 246, 0.05) !important;
+}
+
+[data-theme="light"] .hover\:bg-blue-50:hover {
+    background: rgba(59, 130, 246, 0.05) !important;
+}
+
+[data-theme="light"] .hover\:bg-amber-50:hover {
+    background: rgba(245, 158, 11, 0.05) !important;
+}
+
+[data-theme="light"] .hover\:bg-red-50:hover {
+    background: rgba(239, 68, 68, 0.05) !important;
+}
+
+[data-theme="light"] .hover\:bg-cyan-50:hover {
+    background: rgba(6, 182, 212, 0.05) !important;
+}
+
+/* Quick Fix Code Background - Clean Solution */
+.strategy-doctor-code-background {
+    background: rgba(15, 23, 42, 0.8);
+    /* Dark mode - dark background for green text */
+}
+
+[data-theme="light"] .strategy-doctor-code-background {
+    background: rgba(248, 250, 252, 0.95) !important;
+    /* Light mode - very light background */
+    border: 1px solid rgba(203, 213, 225, 0.5);
+}
+
+[data-theme="light"] .strategy-doctor-code-background .text-emerald-300 {
+    color: #047857 !important;
+    /* Dark green for light background */
+}
+
+/* Quick Fix Container - Perfect Visual Hierarchy */
+.strategy-doctor-quickfix-container {
+    background: rgba(71, 85, 105, 0.4);
+    /* Medium-light grey - darker than inner box */
+}
+
+[data-theme="light"] .strategy-doctor-quickfix-container {
+    background: rgba(226, 232, 240, 0.6) !important;
+    /* Light grey - darker than inner code box */
+    border-color: rgba(148, 163, 184, 0.4) !important;
+}
+
+/* Quick Fix Title - Highly Visible Blue */
+.strategy-doctor-quickfix-title {
+    color: #3b82f6 !important;
+    /* Strong blue for dark mode */
+    font-weight: 600 !important;
+}
+
+[data-theme="light"] .strategy-doctor-quickfix-title {
+    color: #1d4ed8 !important;
+    /* Darker blue for light mode - perfect visibility */
+    font-weight: 600 !important;
+}
+
+/* Override global button styles to ensure blue buttons display correctly */
+.strategy-doctor-container button[class*="bg-blue-500"],
+.strategy-doctor-container button[style*="background-color: #3b82f6"],
+.strategy-doctor-container label[class*="bg-blue-500"],
+.strategy-doctor-container label[style*="background-color: #3b82f6"] {
+    background-color: #3b82f6 !important;
+    color: white !important;
+    border-color: #3b82f6 !important;
+}
+
+.strategy-doctor-container button[class*="bg-blue-500"]:hover,
+.strategy-doctor-container button[style*="background-color: #3b82f6"]:hover,
+.strategy-doctor-container label[class*="bg-blue-500"]:hover,
+.strategy-doctor-container label[style*="background-color: #3b82f6"]:hover {
+    background-color: #2563eb !important;
+    border-color: #2563eb !important;
+}
+
+/* Ensure inline styles take precedence */
+.strategy-doctor-container button[style*="background-color"],
+.strategy-doctor-container label[style*="background-color"] {
+    background-color: inherit !important;
+}
+
+/* Dark mode specific overrides - higher specificity than global CSS */
+[data-theme="dark"] .strategy-doctor-container button[class*="bg-blue-500"],
+[data-theme="dark"] .strategy-doctor-container button[style*="background-color: #3b82f6"],
+[data-theme="dark"] .strategy-doctor-container label[class*="bg-blue-500"],
+[data-theme="dark"] .strategy-doctor-container label[style*="background-color: #3b82f6"] {
+    background-color: #3b82f6 !important;
+    color: white !important;
+    border-color: #3b82f6 !important;
+}
+
+[data-theme="dark"] .strategy-doctor-container button[class*="bg-blue-500"]:hover,
+[data-theme="dark"] .strategy-doctor-container button[style*="background-color: #3b82f6"]:hover,
+[data-theme="dark"] .strategy-doctor-container label[class*="bg-blue-500"]:hover,
+[data-theme="dark"] .strategy-doctor-container label[style*="background-color: #3b82f6"]:hover {
+    background-color: #2563eb !important;
+    border-color: #2563eb !important;
+}
+
+/* Force blue background for buttons with inline styles in dark mode */
+[data-theme="dark"] .strategy-doctor-container button[style*="background-color: #3b82f6"],
+[data-theme="dark"] .strategy-doctor-container label[style*="background-color: #3b82f6"] {
+    background-color: #3b82f6 !important;
+    color: white !important;
+}

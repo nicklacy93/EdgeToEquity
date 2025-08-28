@@ -1,0 +1,14 @@
+﻿{
+    "OverallStatus":  "READY",
+    "Timestamp":  {
+                      "value":  "\/Date(1751381411808)\/",
+                      "DisplayHint":  2,
+                      "DateTime":  "Tuesday, July 1, 2025 7:50:11 AM"
+                  },
+    "CriticalFailures":  0,
+    "Duration":  5.2087835,
+    "PassRate":  0,
+    "TestSuites":  [
+
+                   ]
+}

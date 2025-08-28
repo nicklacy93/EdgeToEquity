@@ -1,0 +1,1260 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
+import {
+    Stethoscope,
+    AlertTriangle,
+    CheckCircle,
+    Lightbulb,
+    Code,
+    TrendingUp,
+    Shield,
+    Zap,
+    ArrowLeft,
+    ArrowRight,
+    Copy,
+    ExternalLink,
+    MessageCircle,
+    Bot,
+    Eye,
+    Edit3,
+    Play,
+    Target,
+    Clock,
+    Download,
+    SkipForward,
+    HelpCircle,
+    Settings
+} from 'lucide-react';
+import { useStrategyStore } from '@/store/useStrategyStore';
+import { useWorkspaceStore } from '@/store/useWorkspaceStore';
+import { useUserStore } from '@/store/useUserStore';
+
+interface StrategyDebuggerProps {
+    generatedCode?: string;
+    selectedPlatform?: 'NinjaScript' | 'PineScript';
+}
+
+interface CodeSuggestion {
+    line: number;
+    type: 'error' | 'warning' | 'optimization' | 'enhancement';
+    message: string;
+    fix: string;
+    impact: string;
+    severity: 'high' | 'medium' | 'low';
+}
+
+interface EdgeBotMessage {
+    id: number;
+    type: 'bot' | 'user' | 'system';
+    content: string;
+    timestamp: Date;
+    showCode?: boolean;
+    codeLines?: number[];
+    actionButtons?: {
+        label: string;
+        action: string;
+        variant?: 'primary' | 'secondary' | 'danger';
+    }[];
+    context?: {
+        userPreference?: string;
+        currentFocus?: string;
+        completedSteps?: string[];
+        skippedIssues?: string[];
+    };
+}
+
+interface ConversationContext {
+    userLevel: 'beginner' | 'intermediate' | 'advanced';
+    preferredLearningStyle: 'visual' | 'hands-on' | 'theoretical';
+    completedFixes: string[];
+    skippedIssues: string[];
+    currentFocus: string;
+    questionsAsked: string[];
+    lastAction: string;
+    sessionStartTime: Date;
+}
+
+interface CodeAnalysis {
+    line: number;
+    type: 'error' | 'warning' | 'optimization' | 'enhancement';
+    severity: 'high' | 'medium' | 'low';
+    message: string;
+    fix: string;
+    impact: string;
+    performanceImpact: {
+        riskReduction: number;
+        expectedReturn: number;
+        falseSignalReduction: number;
+    };
+    confidence: number;
+    estimatedTimeToFix: number;
+}
+
+const StrategyDebugger = ({ generatedCode: propGeneratedCode, selectedPlatform: propSelectedPlatform }: StrategyDebuggerProps = {}) => {
+    const { generatedCode: storeGeneratedCode, setGeneratedCode, selectedPlatform: storeSelectedPlatform } = useStrategyStore();
+    const { setActiveTab } = useWorkspaceStore();
+
+    // User Store Integration
+    const {
+        incrementConceptsLearned,
+        addFocusTime,
+        updateLearningStreak,
+        markStrategyComplete,
+        updateCompletionRate
+    } = useUserStore();
+
+    // Use props if provided, otherwise fall back to store
+    const generatedCode = propGeneratedCode || storeGeneratedCode;
+    const selectedPlatform = propSelectedPlatform || storeSelectedPlatform;
+
+    // Debug logging
+    console.log('StrategyDebugger props:', { propGeneratedCode, propSelectedPlatform });
+    console.log('StrategyDebugger store:', { storeGeneratedCode, storeSelectedPlatform });
+    console.log('StrategyDebugger final:', { generatedCode, selectedPlatform });
+
+    const [analysisComplete, setAnalysisComplete] = useState(false);
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [issues, setIssues] = useState<any[]>([]);
+    const [suggestions, setSuggestions] = useState<any[]>([]);
+    const [codeSuggestions, setCodeSuggestions] = useState<CodeSuggestion[]>([]);
+    const [hoveredLine, setHoveredLine] = useState<number | null>(null);
+    const [selectedSuggestion, setSelectedSuggestion] = useState<CodeSuggestion | null>(null);
+    const [edgeBotMessages, setEdgeBotMessages] = useState<EdgeBotMessage[]>([]);
+    const [isEdgeBotTyping, setIsEdgeBotTyping] = useState(false);
+    const [currentStep, setCurrentStep] = useState(1);
+    const [totalSteps, setTotalSteps] = useState(5);
+    const [strategyConfidence, setStrategyConfidence] = useState(85);
+    const [showFullCode, setShowFullCode] = useState(false);
+    const [userInput, setUserInput] = useState('');
+
+    // Phase 2A: Advanced Intelligence State
+    const [conversationContext, setConversationContext] = useState<ConversationContext>({
+        userLevel: 'intermediate',
+        preferredLearningStyle: 'hands-on',
+        completedFixes: [],
+        skippedIssues: [],
+        currentFocus: 'initial-analysis',
+        questionsAsked: [],
+        lastAction: 'analysis-started',
+        sessionStartTime: new Date()
+    });
+    const [userPreferences, setUserPreferences] = useState({
+        showDetailedExplanations: true,
+        preferCodeExamples: true,
+        wantPerformanceMetrics: true,
+        autoApplyFixes: false
+    });
+    const [codeAnalysis, setCodeAnalysis] = useState<CodeAnalysis[]>([]);
+    const [currentStrategy, setCurrentStrategy] = useState({
+        originalCode: '',
+        modifiedCode: '',
+        changesApplied: [],
+        performanceMetrics: {
+            originalRisk: 0,
+            currentRisk: 0,
+            expectedReturn: 0,
+            improvement: 0
+        }
+    });
+
+    // Refs for auto-scrolling
+    const conversationEndRef = useRef<HTMLDivElement>(null);
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+    // Auto-scroll to bottom when new messages arrive
+    const scrollToBottom = () => {
+        conversationEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    // Auto-scroll effect
+    useEffect(() => {
+        scrollToBottom();
+    }, [edgeBotMessages, isEdgeBotTyping]);
+
+    // Phase 2A: Intelligent Analysis Functions
+    const analyzeUserBehavior = (action: string, message?: string) => {
+        const newContext = { ...conversationContext };
+
+        // Track user actions and preferences
+        newContext.lastAction = action;
+        if (message) {
+            newContext.questionsAsked.push(message);
+        }
+
+        // Determine user level based on actions
+        if (action.includes('skip') || action.includes('advanced')) {
+            newContext.userLevel = 'advanced';
+        } else if (action.includes('explain') || action.includes('help')) {
+            newContext.userLevel = 'beginner';
+        }
+
+        // Track learning preferences
+        if (action.includes('show_code') || action.includes('visual')) {
+            newContext.preferredLearningStyle = 'visual';
+        } else if (action.includes('apply') || action.includes('hands')) {
+            newContext.preferredLearningStyle = 'hands-on';
+        }
+
+        setConversationContext(newContext);
+    };
+
+    const generatePersonalizedResponse = (action: string, baseMessage: string): string => {
+        const { userLevel, preferredLearningStyle, completedFixes, questionsAsked } = conversationContext;
+
+        let personalizedMessage = baseMessage;
+
+        // Adjust tone based on user level
+        if (userLevel === 'beginner') {
+            personalizedMessage += "\n\n💡 **Pro Tip:** I'll guide you through each step with detailed explanations.";
+        } else if (userLevel === 'advanced') {
+            personalizedMessage += "\n\n⚡ **Quick Mode:** I'll focus on the technical details and advanced optimizations.";
+        }
+
+        // Add context based on previous actions
+        if (completedFixes.length > 0) {
+            personalizedMessage += `\n\n📈 **Progress:** You've already improved ${completedFixes.length} areas of your strategy.`;
+        }
+
+        // Add learning style preference
+        if (preferredLearningStyle === 'visual') {
+            personalizedMessage += "\n\n🎨 **Visual Learner:** I'll show you code examples and visual comparisons.";
+        } else if (preferredLearningStyle === 'hands-on') {
+            personalizedMessage += "\n\n🔧 **Hands-on:** I'll provide practical, actionable fixes you can apply immediately.";
+        }
+
+        return personalizedMessage;
+    };
+
+    const calculatePerformanceImpact = (fixes: string[]): any => {
+        const baseMetrics = {
+            riskReduction: 0,
+            expectedReturn: 0,
+            falseSignalReduction: 0,
+            confidence: 85
+        };
+
+        fixes.forEach(fix => {
+            if (fix.includes('stop-loss')) {
+                baseMetrics.riskReduction += 40;
+                baseMetrics.confidence += 5;
+            }
+            if (fix.includes('confirmation')) {
+                baseMetrics.falseSignalReduction += 30;
+                baseMetrics.expectedReturn += 15;
+            }
+            if (fix.includes('volume')) {
+                baseMetrics.falseSignalReduction += 20;
+                baseMetrics.expectedReturn += 10;
+            }
+        });
+
+        return {
+            ...baseMetrics,
+            riskReduction: Math.min(baseMetrics.riskReduction, 80),
+            expectedReturn: Math.min(baseMetrics.expectedReturn, 50),
+            falseSignalReduction: Math.min(baseMetrics.falseSignalReduction, 60),
+            confidence: Math.min(baseMetrics.confidence, 95)
+        };
+    };
+
+    const getNextBestAction = (): string => {
+        const { completedFixes, skippedIssues, currentFocus } = conversationContext;
+
+        if (completedFixes.length === 0) {
+            return 'show_code'; // Start with first critical fix
+        }
+
+        if (completedFixes.includes('stop-loss') && !completedFixes.includes('confirmation')) {
+            return 'next_issue'; // Move to entry confirmation
+        }
+
+        if (completedFixes.includes('confirmation') && !completedFixes.includes('volume')) {
+            return 'show_volume_fix'; // Add volume filter
+        }
+
+        return 'show_optimization'; // Move to optimizations
+    };
+
+    const handleAnalyze = async () => {
+        setIsAnalyzing(true);
+
+        // User Store Integration: Track analysis initiation
+        incrementConceptsLearned(); // Learning from analysis
+        addFocusTime(3); // Add 3 minutes of focus time for analysis
+        updateLearningStreak(); // Update learning streak
+
+        // Simulate analysis time
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Initialize intelligent conversation context
+        const initialContext = {
+            ...conversationContext,
+            currentFocus: 'initial-analysis',
+            sessionStartTime: new Date()
+        };
+        setConversationContext(initialContext);
+
+        // Generate personalized initial message
+        const initialMessage = generatePersonalizedResponse('analysis_started',
+            `🎯 **Strategy Analysis Complete!**\n\nI've analyzed your ${selectedPlatform} strategy and found several opportunities to enhance its performance and reduce risk.\n\n**Key Findings:**\n• **Risk Level:** High (missing stop-loss protection)\n• **Signal Quality:** Medium (no confirmation filters)\n• **Optimization Potential:** High (multiple improvements available)\n\n**Expected Improvements with Optimization:**\n• Risk reduction: 60-80%\n• Performance increase: 25-40%\n• False signal reduction: 40-60%\n\nI'll guide you through each improvement step-by-step, adapting to your learning style and experience level. Let's start with the most critical issue first!`
+        );
+
+        const initialEdgeBotMessage: EdgeBotMessage = {
+            id: 1,
+            type: 'bot',
+            content: initialMessage,
+            timestamp: new Date(),
+            actionButtons: [
+                { label: 'Show first critical fix', action: 'show_code', variant: 'primary' },
+                { label: 'View all issues', action: 'show_all', variant: 'secondary' },
+                { label: 'Ask a question', action: 'ask_question', variant: 'secondary' }
+            ],
+            context: {
+                currentFocus: 'initial-analysis',
+                userPreference: conversationContext.preferredLearningStyle
+            }
+        };
+
+        setEdgeBotMessages([initialEdgeBotMessage]);
+        setAnalysisComplete(true);
+        setIsAnalyzing(false);
+    };
+
+    useEffect(() => {
+        if (generatedCode && generatedCode.trim().length > 0) {
+            // Automatically run analysis when component loads with code
+            handleAnalyze();
+        }
+    }, [generatedCode]);
+
+    const handleBackToArchitect = () => {
+        setActiveTab('generator');
+    };
+
+    const handleCopyCode = (code: string) => {
+        navigator.clipboard.writeText(code);
+        // Could add toast notification here
+    };
+
+    const handleApplyFix = (suggestion: CodeSuggestion) => {
+        // Simulate applying the fix
+        setIsEdgeBotTyping(true);
+
+        // User Store Integration: Track fix application
+        incrementConceptsLearned(); // Learning from applying fixes
+        addFocusTime(2); // Add 2 minutes of focus time
+        updateLearningStreak(); // Update learning streak
+
+        setTimeout(() => {
+            const newMessage: EdgeBotMessage = {
+                id: edgeBotMessages.length + 1,
+                type: 'bot',
+                content: "Perfect! ✅ I've applied the fix for \"" + suggestion.message + "\". This will " + suggestion.impact.toLowerCase() + ".\n\nYour strategy is now safer and more robust. The next priority is adding entry confirmation signals to reduce false entries. Should we tackle that next?",
+                timestamp: new Date(),
+                actionButtons: [
+                    { label: 'Yes, continue', action: 'continue', variant: 'primary' },
+                    { label: 'Show me the changes', action: 'show_changes', variant: 'secondary' }
+                ]
+            };
+
+            setEdgeBotMessages(prev => [...prev, newMessage]);
+            setIsEdgeBotTyping(false);
+            setSelectedSuggestion(null);
+            setCurrentStep(prev => prev + 1);
+        }, 1500);
+    };
+
+    const handleEdgeBotAction = (action: string) => {
+        // Analyze user behavior for intelligence
+        analyzeUserBehavior(action);
+
+        setIsEdgeBotTyping(true);
+
+        setTimeout(() => {
+            let newMessage: EdgeBotMessage;
+
+            switch (action) {
+                case 'show_code':
+                    const codeMessage = generatePersonalizedResponse(action,
+                        "Here's the problematic code at line 15:\n\n// Current code - missing stop-loss\nif (Close[0] > EMA[0]) {\n    EnterLong();\n}\n\nThis code enters a position but has no protection against losses. Let me show you how to add stop-loss protection:"
+                    );
+                    newMessage = {
+                        id: edgeBotMessages.length + 1,
+                        type: 'bot',
+                        content: codeMessage,
+                        timestamp: new Date(),
+                        showCode: true,
+                        codeLines: [15, 16, 17],
+                        actionButtons: [
+                            { label: 'Apply this fix', action: 'apply_fix', variant: 'primary' },
+                            { label: 'Explain more', action: 'explain', variant: 'secondary' }
+                        ],
+                        context: {
+                            currentFocus: 'stop-loss-implementation',
+                            userPreference: conversationContext.preferredLearningStyle
+                        }
+                    };
+                    break;
+
+                case 'apply_fix':
+                    // Update conversation context
+                    const updatedContext = { ...conversationContext };
+                    updatedContext.completedFixes.push('stop-loss');
+                    updatedContext.currentFocus = 'entry-confirmation';
+                    setConversationContext(updatedContext);
+
+                    // Calculate performance impact
+                    const performanceImpact = calculatePerformanceImpact(updatedContext.completedFixes);
+
+                    const applyMessage = generatePersonalizedResponse(action,
+                        `Excellent choice! 🛡️ I've added stop-loss protection to your strategy:\n\n// Fixed code with stop-loss\nif (Close[0] > EMA[0]) {\n    EnterLong();\n    stopLoss = Close[0] - (Close[0] * 0.02); // 2% stop-loss\n}\n\n// Stop-loss check\nif (Close[0] < stopLoss) {\n    ExitLong();\n}\n\nThis protects your capital by automatically exiting if the price drops 2% below your entry.\n\n📊 **Performance Impact:**\n• Risk Reduction: ${performanceImpact.riskReduction}%\n• Expected Return: +${performanceImpact.expectedReturn}%\n• Confidence: ${performanceImpact.confidence}%`
+                    );
+
+                    newMessage = {
+                        id: edgeBotMessages.length + 1,
+                        type: 'bot',
+                        content: applyMessage,
+                        timestamp: new Date(),
+                        showCode: true,
+                        codeLines: [15, 16, 17, 20, 21, 22],
+                        actionButtons: [
+                            { label: 'Continue to next issue', action: 'next_issue', variant: 'primary' },
+                            { label: 'Adjust stop-loss %', action: 'adjust_stop', variant: 'secondary' }
+                        ],
+                        context: {
+                            currentFocus: 'entry-confirmation',
+                            completedSteps: updatedContext.completedFixes
+                        }
+                    };
+                    break;
+
+                case 'next_issue':
+                    const nextMessage = generatePersonalizedResponse(action,
+                        "Great! Now let's address the second issue: **No Entry Confirmation**.\n\nYour strategy currently enters positions without proper confirmation signals, which can lead to false entries. I recommend adding RSI or MACD confirmation.\n\nWould you like me to show you how to implement this?"
+                    );
+
+                    newMessage = {
+                        id: edgeBotMessages.length + 1,
+                        type: 'bot',
+                        content: nextMessage,
+                        timestamp: new Date(),
+                        actionButtons: [
+                            { label: 'Show me the fix', action: 'show_confirmation_fix', variant: 'primary' },
+                            { label: 'Skip this issue', action: 'skip_confirmation', variant: 'secondary' }
+                        ],
+                        context: {
+                            currentFocus: 'entry-confirmation',
+                            userPreference: conversationContext.preferredLearningStyle
+                        }
+                    };
+                    break;
+
+                case 'show_all':
+                    const { completedFixes, questionsAsked } = conversationContext;
+                    const performanceMetrics = calculatePerformanceImpact(completedFixes);
+
+                    const overviewMessage = generatePersonalizedResponse(action,
+                        `Here's a complete overview of your strategy analysis:\n\n**Critical Issues Found:**\n• Missing stop-loss protection (Line 15)\n• No entry confirmation signals (Line 23)\n\n**Optimization Opportunities:**\n• Add volume filter (Line 31)\n• Implement trailing stop\n• Add time-based filters\n\n**Current Progress:**\n• Completed Fixes: ${completedFixes.length}\n• Questions Asked: ${questionsAsked.length}\n\n**Expected Improvements:**\n• Risk reduction: ${performanceMetrics.riskReduction}%\n• Performance increase: +${performanceMetrics.expectedReturn}%\n• False signal reduction: ${performanceMetrics.falseSignalReduction}%\n\nWhich area would you like to focus on first?`
+                    );
+
+                    newMessage = {
+                        id: edgeBotMessages.length + 1,
+                        type: 'bot',
+                        content: overviewMessage,
+                        timestamp: new Date(),
+                        actionButtons: [
+                            { label: 'Fix stop-loss first', action: 'show_code', variant: 'primary' },
+                            { label: 'Show all code fixes', action: 'show_all_fixes', variant: 'secondary' }
+                        ],
+                        context: {
+                            currentFocus: 'strategy-overview',
+                            completedSteps: completedFixes
+                        }
+                    };
+                    break;
+
+                case 'ask_question':
+                    const helpMessage = generatePersonalizedResponse(action,
+                        "I'm here to help! What specific question do you have about your strategy? I can help with:\n\n• Code optimization\n• Risk management\n• Performance analysis\n• Entry/exit logic\n• Platform-specific features\n\nJust type your question below and I'll provide detailed guidance."
+                    );
+
+                    newMessage = {
+                        id: edgeBotMessages.length + 1,
+                        type: 'bot',
+                        content: helpMessage,
+                        timestamp: new Date(),
+                        actionButtons: [
+                            { label: 'Show common questions', action: 'show_common_questions', variant: 'primary' },
+                            { label: 'Back to analysis', action: 'show_all', variant: 'secondary' }
+                        ],
+                        context: {
+                            currentFocus: 'user-question',
+                            userPreference: conversationContext.preferredLearningStyle
+                        }
+                    };
+                    break;
+
+                case 'show_common_questions':
+                    const commonQuestions = [
+                        "How do I add a trailing stop?",
+                        "What's the best risk management approach?",
+                        "How can I optimize my entry signals?",
+                        "What's the difference between RSI and MACD?",
+                        "How do I backtest this strategy?"
+                    ];
+
+                    const questionsMessage = generatePersonalizedResponse(action,
+                        `Here are some common questions traders ask about strategy optimization:\n\n${commonQuestions.map((q, i) => `${i + 1}. ${q}`).join('\n')}\n\nClick any question above or type your own question below. I'll provide personalized guidance based on your ${selectedPlatform} strategy.`
+                    );
+
+                    newMessage = {
+                        id: edgeBotMessages.length + 1,
+                        type: 'bot',
+                        content: questionsMessage,
+                        timestamp: new Date(),
+                        actionButtons: [
+                            { label: 'Ask about trailing stops', action: 'explain_trailing_stop', variant: 'primary' },
+                            { label: 'Risk management guide', action: 'explain_risk_management', variant: 'secondary' }
+                        ],
+                        context: {
+                            currentFocus: 'common-questions',
+                            userPreference: conversationContext.preferredLearningStyle
+                        }
+                    };
+                    break;
+
+                default:
+                    const defaultMessage = generatePersonalizedResponse(action,
+                        "I'm here to help! What would you like to know about your strategy?"
+                    );
+
+                    newMessage = {
+                        id: edgeBotMessages.length + 1,
+                        type: 'bot',
+                        content: defaultMessage,
+                        timestamp: new Date(),
+                        actionButtons: [
+                            { label: 'Show all issues', action: 'show_all', variant: 'primary' },
+                            { label: 'Ask a question', action: 'ask_question', variant: 'secondary' }
+                        ],
+                        context: {
+                            currentFocus: 'general-help',
+                            userPreference: conversationContext.preferredLearningStyle
+                        }
+                    };
+            }
+
+            setEdgeBotMessages(prev => [...prev, newMessage]);
+            setIsEdgeBotTyping(false);
+        }, 1000);
+    };
+
+    const handleUserInput = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!userInput.trim()) return;
+
+        // Add user message
+        const userMessage: EdgeBotMessage = {
+            id: edgeBotMessages.length + 1,
+            type: 'user',
+            content: userInput,
+            timestamp: new Date()
+        };
+
+        setEdgeBotMessages(prev => [...prev, userMessage]);
+
+        // Analyze user behavior
+        analyzeUserBehavior('user_input', userInput);
+
+        // User Store Integration: Track user questions
+        incrementConceptsLearned(); // Learning from questions
+        addFocusTime(1); // Add 1 minute of focus time
+        updateLearningStreak(); // Update learning streak
+
+        // Clear input
+        setUserInput('');
+
+        // Generate intelligent response
+        setIsEdgeBotTyping(true);
+
+        setTimeout(() => {
+            const response = generateIntelligentResponse(userInput);
+            const botMessage: EdgeBotMessage = {
+                id: edgeBotMessages.length + 2,
+                type: 'bot',
+                content: response.content,
+                timestamp: new Date(),
+                actionButtons: response.actionButtons,
+                context: {
+                    currentFocus: response.context,
+                    userPreference: conversationContext.preferredLearningStyle
+                }
+            };
+
+            setEdgeBotMessages(prev => [...prev, botMessage]);
+            setIsEdgeBotTyping(false);
+        }, 1500);
+    };
+
+    const generateIntelligentResponse = (userQuestion: string): { content: string; actionButtons: any[]; context: string } => {
+        const question = userQuestion.toLowerCase();
+        const { userLevel, completedFixes, preferredLearningStyle } = conversationContext;
+
+        // Risk management questions
+        if (question.includes('risk') || question.includes('stop') || question.includes('loss')) {
+            const riskContent = generatePersonalizedResponse('risk_question',
+                `Great question about risk management! 🛡️\n\n**Current Risk Level:** ${completedFixes.includes('stop-loss') ? 'Medium' : 'High'}\n\n**Recommended Approach:**\n• Set stop-loss at 2-3% below entry\n• Use position sizing (1-2% per trade)\n• Consider trailing stops for winners\n\n**For ${selectedPlatform}:**\n\`\`\`\n// Example stop-loss implementation\nif (Close[0] > EMA[0]) {\n    EnterLong();\n    stopLoss = Close[0] * 0.97; // 3% stop-loss\n}\n\`\`\`\n\nWould you like me to implement this in your strategy?`
+            );
+
+            return {
+                content: riskContent,
+                actionButtons: [
+                    { label: 'Implement stop-loss', action: 'apply_stop_loss', variant: 'primary' },
+                    { label: 'Show risk calculator', action: 'show_risk_calc', variant: 'secondary' }
+                ],
+                context: 'risk-management'
+            };
+        }
+
+        // Performance questions
+        if (question.includes('performance') || question.includes('profit') || question.includes('return')) {
+            const performanceMetrics = calculatePerformanceImpact(completedFixes);
+            const perfContent = generatePersonalizedResponse('performance_question',
+                `Let me analyze your strategy's performance potential! 📊\n\n**Current Expected Performance:**\n• Risk Reduction: ${performanceMetrics.riskReduction}%\n• Expected Return: +${performanceMetrics.expectedReturn}%\n• False Signal Reduction: ${performanceMetrics.falseSignalReduction}%\n\n**Optimization Opportunities:**\n• Add volume filters (+15% performance)\n• Implement trailing stops (+10% performance)\n• Add time-based filters (+5% performance)\n\n**Next Best Action:** ${getNextBestAction() === 'show_code' ? 'Add stop-loss protection' : 'Optimize entry signals'}\n\nWould you like me to implement these optimizations?`
+            );
+
+            return {
+                content: perfContent,
+                actionButtons: [
+                    { label: 'Show optimizations', action: 'show_optimizations', variant: 'primary' },
+                    { label: 'Performance analysis', action: 'detailed_performance', variant: 'secondary' }
+                ],
+                context: 'performance-analysis'
+            };
+        }
+
+        // Code optimization questions
+        if (question.includes('optimize') || question.includes('improve') || question.includes('better')) {
+            const optContent = generatePersonalizedResponse('optimization_question',
+                `I'll help you optimize your strategy! 🚀\n\n**Current Optimization Status:**\n• Code Quality: ${completedFixes.length > 0 ? 'Good' : 'Needs improvement'}\n• Risk Management: ${completedFixes.includes('stop-loss') ? 'Implemented' : 'Missing'}\n• Signal Quality: ${completedFixes.includes('confirmation') ? 'Enhanced' : 'Basic'}\n\n**Recommended Optimizations:**\n1. **Entry Confirmation** - Add RSI/MACD filters\n2. **Volume Filter** - Only trade on high volume\n3. **Time Filters** - Avoid trading during low-liquidity periods\n4. **Trailing Stops** - Lock in profits automatically\n\nLet me show you the first optimization:`
+            );
+
+            return {
+                content: optContent,
+                actionButtons: [
+                    { label: 'Show first optimization', action: 'show_code', variant: 'primary' },
+                    { label: 'Show all optimizations', action: 'show_all_optimizations', variant: 'secondary' }
+                ],
+                context: 'code-optimization'
+            };
+        }
+
+        // Platform-specific questions
+        if (question.includes(selectedPlatform.toLowerCase()) || question.includes('platform')) {
+            const platformContent = generatePersonalizedResponse('platform_question',
+                `Great question about ${selectedPlatform}! 💻\n\n**${selectedPlatform} Specific Features:**\n• Built-in indicators and functions\n• Real-time data feeds\n• Advanced order types\n• Backtesting capabilities\n\n**Your Strategy on ${selectedPlatform}:**\n• Compatible with platform syntax\n• Uses standard indicators\n• Ready for live trading\n\n**Next Steps:**\n1. Test in simulation mode\n2. Optimize parameters\n3. Deploy to live trading\n\nWould you like me to show you how to implement this in ${selectedPlatform}?`
+            );
+
+            return {
+                content: platformContent,
+                actionButtons: [
+                    { label: `Show ${selectedPlatform} code`, action: 'show_platform_code', variant: 'primary' },
+                    { label: 'Platform guide', action: 'platform_guide', variant: 'secondary' }
+                ],
+                context: 'platform-specific'
+            };
+        }
+
+        // General help
+        const generalContent = generatePersonalizedResponse('general_question',
+            `I understand you're asking about "${userQuestion}". Let me help you with that!\n\n**Based on your ${userLevel} level and ${preferredLearningStyle} learning style, here's what I recommend:**\n\n• **For beginners:** I'll provide step-by-step explanations\n• **For advanced users:** I'll focus on technical optimizations\n• **Visual learners:** I'll show code examples and comparisons\n• **Hands-on learners:** I'll provide practical, actionable fixes\n\nWhat specific aspect would you like me to help you with?\n\n💡 **Quick Actions:**\n• Show strategy analysis\n• Explain risk management\n• Optimize code performance\n• Platform-specific guidance`
+        );
+
+        return {
+            content: generalContent,
+            actionButtons: [
+                { label: 'Show strategy analysis', action: 'show_all', variant: 'primary' },
+                { label: 'Ask another question', action: 'ask_question', variant: 'secondary' }
+            ],
+            context: 'general-help'
+        };
+    };
+
+    const handleQuickAction = (action: string) => {
+        switch (action) {
+            case 'apply_all_critical':
+                // User Store Integration: Track bulk fix application
+                incrementConceptsLearned(); // Learning from bulk fixes
+                addFocusTime(5); // Add 5 minutes of focus time
+                updateLearningStreak(); // Update learning streak
+                markStrategyComplete(); // Mark strategy as complete
+                updateCompletionRate(); // Update completion rate
+
+                setIsEdgeBotTyping(true);
+                setTimeout(() => {
+                    const newMessage: EdgeBotMessage = {
+                        id: edgeBotMessages.length + 1,
+                        type: 'bot',
+                        content: "🚀 Fantastic! I've applied all critical fixes to your strategy:\n\n✅ Added stop-loss protection\n✅ Implemented entry confirmation\n✅ Added volume filter\n\nYour strategy is now significantly safer and more robust. The expected improvement is +25% performance with reduced risk.",
+                        timestamp: new Date(),
+                        actionButtons: [
+                            { label: 'Show me the changes', action: 'show_all_changes', variant: 'primary' },
+                            { label: 'Export fixed code', action: 'export_code', variant: 'secondary' }
+                        ]
+                    };
+                    setEdgeBotMessages(prev => [...prev, newMessage]);
+                    setIsEdgeBotTyping(false);
+                    setCurrentStep(totalSteps);
+                }, 2000);
+                break;
+
+            case 'export_code':
+                // Handle code export
+                if (generatedCode) {
+                    const blob = new Blob([generatedCode], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `improved-strategy-${selectedPlatform}.txt`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                }
+                break;
+
+            case 'view_full_code':
+                setShowFullCode(!showFullCode);
+                break;
+        }
+    };
+
+    const renderCodeWithSuggestions = () => {
+        if (!generatedCode) return null;
+
+        const lines = generatedCode.split('\n');
+
+        return (
+            <div className="relative">
+                {lines.map((line, index) => {
+                    const lineNumber = index + 1;
+                    const suggestion = codeSuggestions.find(s => s.line === lineNumber);
+                    const isHovered = hoveredLine === lineNumber;
+                    const isSelected = selectedSuggestion?.line === lineNumber;
+
+                    return (
+                        <div
+                            key={index}
+                            className={`relative group ${suggestion ? 'bg-yellow-50 dark:bg-yellow-900/10' : ''
+                                } ${isHovered ? 'bg-blue-50 dark:bg-blue-900/10' : ''
+                                } ${isSelected ? 'bg-green-50 dark:bg-green-900/10' : ''
+                                }`}
+                            onMouseEnter={() => setHoveredLine(lineNumber)}
+                            onMouseLeave={() => setHoveredLine(null)}
+                        >
+                            <div className="flex items-start">
+                                {/* Line number */}
+                                <div className="w-12 text-xs text-slate-500 dark:text-slate-400 text-right pr-2 select-none">
+                                    {lineNumber}
+                                </div>
+
+                                {/* Code content */}
+                                <div className="flex-1 relative">
+                                    <pre className="text-sm text-slate-800 dark:text-white whitespace-pre-wrap">
+                                        <code>{line}</code>
+                                    </pre>
+
+                                    {/* Suggestion indicator */}
+                                    {suggestion && (
+                                        <div className="absolute -left-2 top-0 bottom-0 w-1 bg-red-500"></div>
+                                    )}
+
+                                    {/* Hover tooltip */}
+                                    {isHovered && suggestion && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: -10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="absolute left-0 top-8 z-10 w-80 p-4 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700"
+                                        >
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <AlertTriangle className={`w-4 h-4 ${suggestion.severity === 'high' ? 'text-red-500' :
+                                                    suggestion.severity === 'medium' ? 'text-amber-500' :
+                                                        'text-blue-500'
+                                                    }`} />
+                                                <span className="text-sm font-medium text-slate-900 dark:text-white">
+                                                    {suggestion.type.toUpperCase()}
+                                                </span>
+                                            </div>
+                                            <p className="text-sm text-slate-700 dark:text-white mb-3">
+                                                {suggestion.message}
+                                            </p>
+                                            <div className="text-xs text-slate-600 dark:text-white mb-3">
+                                                <strong>Impact:</strong> {suggestion.impact}
+                                            </div>
+                                            <button
+                                                onClick={() => handleApplyFix(suggestion)}
+                                                className="w-full px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-lg transition-colors"
+                                            >
+                                                Apply Fix
+                                            </button>
+                                        </motion.div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        );
+    };
+
+    // Loading state
+    if (isAnalyzing) {
+        return (
+            <div className="flex-1 flex flex-col items-center justify-center p-8 min-h-[600px] bg-slate-50 dark:bg-slate-900 strategy-doctor-container">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-center max-w-2xl"
+                >
+                    <motion.div
+                        animate={{ rotate: [0, 360] }}
+                        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                        className="p-6 rounded-2xl bg-blue-500/20 border border-blue-500/30 mx-auto mb-6 w-fit"
+                    >
+                        <Stethoscope className="w-12 h-12 text-blue-400" />
+                    </motion.div>
+
+                    <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">
+                        Performing Strategy Analysis...
+                    </h2>
+                    <p className="text-slate-700 dark:text-white text-lg mb-8 leading-relaxed">
+                        I'm conducting a comprehensive medical examination of your trading strategy.
+                        This includes risk assessment, performance optimization, and enhancement recommendations.
+                    </p>
+
+                    <div className="flex items-center justify-center gap-2 text-blue-500">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    </div>
+                </motion.div>
+            </div>
+        );
+    }
+
+    // No Code State - Show when no generatedCode is available
+    if (!generatedCode && !isAnalyzing && !analysisComplete) {
+        return (
+            <div className="flex-1 flex flex-col items-center justify-center p-8 min-h-[600px] bg-slate-50 dark:bg-slate-900 strategy-doctor-container">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-center max-w-2xl"
+                >
+                    <motion.div
+                        animate={{ rotate: [0, 360] }}
+                        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                        className="p-6 rounded-2xl bg-blue-500/20 border border-blue-500/30 mx-auto mb-6 w-fit"
+                    >
+                        <Stethoscope className="w-12 h-12 text-blue-400" />
+                    </motion.div>
+
+                    <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-4">Strategy Medical Examination 🩺</h2>
+                    <p className="text-slate-700 dark:text-white text-lg mb-8 leading-relaxed">
+                        I'm your AI Strategy Physician. I'll perform a comprehensive analysis of your trading strategy,
+                        diagnosing potential issues and prescribing specific improvements to optimize performance and minimize risk.
+                    </p>
+
+                    <div className="p-6 rounded-xl bg-amber-500/10 border border-amber-500/30">
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                            <AlertTriangle className="w-5 h-5 text-amber-400" />
+                            No Strategy Code Found
+                        </h3>
+                        <p className="text-slate-700 dark:text-white mb-4">
+                            Please generate a strategy in the Strategy Architect first, then return here for analysis.
+                        </p>
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={handleBackToArchitect}
+                            className="flex items-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-all"
+                        >
+                            <ArrowRight className="w-4 h-4" />
+                            Go to Strategy Architect
+                        </motion.button>
+                    </div>
+                </motion.div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50 dark:bg-slate-900 strategy-doctor-container strategy-debugger">
+            {/* Header with Progress */}
+            <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 dashboard-header">
+                <div className="flex items-center gap-4">
+                    <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleBackToArchitect}
+                        className="flex items-center gap-2 px-4 py-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                        Back to Architect
+                    </motion.button>
+                    <div className="h-6 w-px bg-slate-300 dark:bg-slate-600"></div>
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                            <Stethoscope className="w-5 h-5 text-blue-500" />
+                        </div>
+                        <div>
+                            <h1 className="text-xl font-bold text-slate-900 dark:text-white">Strategy Doctor</h1>
+                            <p className="text-sm text-slate-600 dark:text-slate-300">AI-Powered Strategy Analysis</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-6">
+                    {/* Progress Indicator */}
+                    <div className="flex items-center gap-3">
+                        <div className="text-sm text-slate-600 dark:text-slate-300">
+                            Step {currentStep} of {totalSteps}
+                        </div>
+                        <div className="w-32 h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                            <motion.div
+                                className="h-full bg-blue-500"
+                                initial={{ width: 0 }}
+                                animate={{ width: `${(currentStep / totalSteps) * 100}%` }}
+                                transition={{ duration: 0.5 }}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Confidence Score */}
+                    <div className="flex items-center gap-2">
+                        <Target className="w-4 h-4 text-green-500" />
+                        <span className="text-sm font-medium text-slate-900 dark:text-white">
+                            {strategyConfidence}% Confidence
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Main Content - EdgeBot Centric Layout */}
+            <div className="flex-1 flex overflow-hidden">
+                {/* Quick Actions Panel (30%) - Now on LEFT */}
+                <div className="w-[30%] flex flex-col bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700">
+                    {/* Quick Actions Header */}
+                    <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+                        <h3 className="font-semibold text-slate-900 dark:text-white mb-2">Quick Actions</h3>
+                        <p className="text-sm text-slate-600 dark:text-slate-300">Common tasks and shortcuts</p>
+                    </div>
+
+                    {/* Quick Actions */}
+                    <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50 dark:bg-slate-900">
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => handleQuickAction('apply_all_critical')}
+                            className="w-full p-4 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors flex items-center gap-3"
+                        >
+                            <Shield className="w-5 h-5" />
+                            <div className="text-left">
+                                <div className="font-semibold">Apply All Critical Fixes</div>
+                                <div className="text-sm opacity-90">Fix all high-priority issues</div>
+                            </div>
+                        </motion.button>
+
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => handleQuickAction('view_full_code')}
+                            className="w-full p-4 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg font-medium transition-colors flex items-center gap-3"
+                        >
+                            <Code className="w-5 h-5" />
+                            <div className="text-left">
+                                <div className="font-semibold">{showFullCode ? 'Hide Full Code' : 'View Full Code'}</div>
+                                <div className="text-sm opacity-90">See complete strategy</div>
+                            </div>
+                        </motion.button>
+
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => handleQuickAction('export_code')}
+                            className="w-full p-4 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg font-medium transition-colors flex items-center gap-3"
+                        >
+                            <Download className="w-5 h-5" />
+                            <div className="text-left">
+                                <div className="font-semibold">Export Fixed Code</div>
+                                <div className="text-sm opacity-90">Download improved strategy</div>
+                            </div>
+                        </motion.button>
+
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => handleEdgeBotAction('ask_question')}
+                            className="w-full p-4 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg font-medium transition-colors flex items-center gap-3"
+                        >
+                            <HelpCircle className="w-5 h-5" />
+                            <div className="text-left">
+                                <div className="font-semibold">Ask EdgeBot Anything</div>
+                                <div className="text-sm opacity-90">Get expert advice</div>
+                            </div>
+                        </motion.button>
+                    </div>
+
+                    {/* Strategy Summary */}
+                    <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+                        <h4 className="font-medium text-slate-900 dark:text-white mb-3">Strategy Summary</h4>
+                        <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                                <span className="text-slate-600 dark:text-slate-300">Issues Found:</span>
+                                <span className="font-medium text-red-500">{issues.length}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-slate-600 dark:text-slate-300">Optimizations:</span>
+                                <span className="font-medium text-amber-500">{suggestions.length}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-slate-600 dark:text-slate-300">Expected Impact:</span>
+                                <span className="font-medium text-green-500">+25%</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-slate-600 dark:text-slate-300">Time to Fix:</span>
+                                <span className="font-medium text-blue-500">~5 min</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* EdgeBot Conversation (70%) - Now on RIGHT */}
+                <div className="w-[70%] flex flex-col">
+                    {/* EdgeBot Header */}
+                    <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                                <Bot className="w-6 h-6 text-white" />
+                            </div>
+                            <div>
+                                <h3 className="font-semibold text-slate-900 dark:text-white">EdgeBot Strategy Consultation</h3>
+                                <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-300">
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                        <span>AI Intelligence Active</span>
+                                    </div>
+                                    <span>•</span>
+                                    <span className="capitalize">{conversationContext.userLevel} Level</span>
+                                    <span>•</span>
+                                    <span className="capitalize">{conversationContext.preferredLearningStyle} Learner</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-1 rounded-full">
+                                Phase 2A Active
+                            </div>
+                            <button
+                                onClick={() => setShowFullCode(!showFullCode)}
+                                className="p-2 text-slate-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
+                            >
+                                <Eye className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Fixed-Height Conversation Area with Auto-Scroll */}
+                    <div className="flex-1 flex flex-col overflow-hidden bg-white dark:bg-slate-900">
+                        {/* Messages Container - Fixed Height with Internal Scroll */}
+                        <div
+                            ref={messagesContainerRef}
+                            className="flex-1 overflow-y-auto p-4 space-y-4"
+                            style={{ maxHeight: '500px' }}
+                        >
+                            {edgeBotMessages.map((message) => (
+                                <motion.div
+                                    key={message.id}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className={`flex gap-3 ${message.type === 'user' ? 'justify-end' : 'justify-start'
+                                        }`}
+                                >
+                                    {message.type === 'bot' && (
+                                        <div className="p-2 rounded-lg bg-blue-500/10 border border-blue-500/20 flex-shrink-0">
+                                            <Bot className="w-4 h-4 text-blue-500" />
+                                        </div>
+                                    )}
+
+                                    <div className={`max-w-lg p-4 rounded-lg ${message.type === 'bot'
+                                        ? 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm'
+                                        : 'bg-blue-500 text-white'
+                                        }`}>
+                                        <div className="whitespace-pre-wrap text-sm mb-3 text-slate-900 dark:text-white">{message.content}</div>
+
+                                        {/* Inline Code Display */}
+                                        {message.showCode && (
+                                            <div className="mb-3">
+                                                <div className="bg-slate-100 dark:bg-slate-900 rounded-lg p-3 border border-slate-200 dark:border-slate-700">
+                                                    <pre className="text-xs text-slate-800 dark:text-white overflow-x-auto">
+                                                        <code>{message.content.includes('```') ?
+                                                            message.content.split('```')[1] :
+                                                            '// Code snippet would appear here'
+                                                        }</code>
+                                                    </pre>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Action Buttons */}
+                                        {message.actionButtons && (
+                                            <div className="flex gap-2 flex-wrap">
+                                                {message.actionButtons.map((button, index) => (
+                                                    <button
+                                                        key={index}
+                                                        onClick={() => handleEdgeBotAction(button.action)}
+                                                        className={`px-3 py-2 text-xs rounded-lg transition-colors ${button.variant === 'primary'
+                                                            ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                                                            : button.variant === 'danger'
+                                                                ? 'bg-red-500 hover:bg-red-600 text-white'
+                                                                : 'bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200'
+                                                            }`}
+                                                    >
+                                                        {button.label}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {message.type === 'user' && (
+                                        <div className="p-2 rounded-lg bg-slate-500/10 border border-slate-500/20 flex-shrink-0">
+                                            <MessageCircle className="w-4 h-4 text-slate-500" />
+                                        </div>
+                                    )}
+                                </motion.div>
+                            ))}
+
+                            {isEdgeBotTyping && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="flex gap-3 justify-start"
+                                >
+                                    <div className="p-2 rounded-lg bg-blue-500/10 border border-blue-500/20 flex-shrink-0">
+                                        <Bot className="w-4 h-4 text-blue-500" />
+                                    </div>
+                                    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-4 rounded-lg">
+                                        <div className="flex items-center gap-1">
+                                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+
+                            {/* Invisible element for auto-scroll */}
+                            <div ref={conversationEndRef} />
+                        </div>
+
+                        {/* Progress Indicator */}
+                        <div className="px-4 py-3 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+                            <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                                    Strategy Optimization Progress
+                                </span>
+                                <span className="text-xs text-slate-500 dark:text-slate-400">
+                                    {conversationContext.completedFixes.length} of 4 completed
+                                </span>
+                            </div>
+                            <div className="flex gap-2">
+                                {[
+                                    { id: 'stop-loss', label: 'Stop-Loss', status: conversationContext.completedFixes.includes('stop-loss') ? 'completed' : 'pending' },
+                                    { id: 'confirmation', label: 'Entry Confirmation', status: conversationContext.completedFixes.includes('confirmation') ? 'completed' : 'pending' },
+                                    { id: 'volume', label: 'Volume Filter', status: conversationContext.completedFixes.includes('volume') ? 'completed' : 'pending' },
+                                    { id: 'optimization', label: 'Advanced Optimization', status: conversationContext.completedFixes.includes('optimization') ? 'completed' : 'pending' }
+                                ].map((step) => (
+                                    <div
+                                        key={step.id}
+                                        className={`flex-1 h-2 rounded-full transition-all duration-300 ${step.status === 'completed'
+                                            ? 'bg-green-500'
+                                            : step.id === conversationContext.currentFocus
+                                                ? 'bg-blue-500 animate-pulse'
+                                                : 'bg-slate-200 dark:bg-slate-700'
+                                            }`}
+                                        title={`${step.label}: ${step.status === 'completed' ? 'Completed' : 'Pending'}`}
+                                    />
+                                ))}
+                            </div>
+                            <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+                                Current focus: <span className="font-medium text-blue-600 dark:text-blue-400">
+                                    {conversationContext.currentFocus.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Persistent Input Area - Always Visible */}
+                        <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                            <div className="flex items-center gap-3">
+                                <div className="flex-1 relative">
+                                    <input
+                                        type="text"
+                                        value={userInput}
+                                        onChange={(e) => setUserInput(e.target.value)}
+                                        placeholder="Ask EdgeBot about your strategy..."
+                                        className="w-full px-4 py-3 pr-12 bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        onKeyPress={(e) => {
+                                            if (e.key === 'Enter') {
+                                                handleUserInput(e);
+                                            }
+                                        }}
+                                    />
+                                    <button
+                                        onClick={(e) => handleUserInput(e)}
+                                        className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-slate-500 dark:text-slate-400 hover:text-blue-500 dark:hover:text-blue-400 transition-colors"
+                                    >
+                                        <ArrowRight className="w-4 h-4" />
+                                    </button>
+                                </div>
+                                <button
+                                    onClick={() => handleEdgeBotAction('show_all')}
+                                    className="px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                                >
+                                    <HelpCircle className="w-4 h-4" />
+                                    Quick Help
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Full Code Display (Conditional) - Fixed Height */}
+            {showFullCode && (
+                <div className="h-80 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex flex-col">
+                    <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex-shrink-0">
+                        <div className="flex items-center justify-between">
+                            <h3 className="font-semibold text-slate-900 dark:text-white">Full Strategy Code</h3>
+                            <div className="flex items-center gap-2">
+                                <div className="px-2 py-1 rounded text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                                    {selectedPlatform}
+                                </div>
+                                <button
+                                    onClick={() => handleCopyCode(generatedCode)}
+                                    className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                                >
+                                    <Copy className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex-1 overflow-y-auto p-4 bg-slate-50 dark:bg-slate-900">
+                        {renderCodeWithSuggestions()}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default StrategyDebugger; 

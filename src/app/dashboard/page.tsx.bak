@@ -1,0 +1,23 @@
+﻿'use client';
+
+import AIInsightCard from '@/components/dashboard/AIInsightCard';
+import HeroSection from '@/components/HeroSection';
+import KPIGrid from '@/components/dashboard/KPIGrid';
+import HeroSection from '@/components/HeroSection';
+import TradingViewChart from '@/components/TradingView/TradingViewChart';
+import HeroSection from '@/components/HeroSection';
+
+export default function DashboardPage() {
+  return (
+    <div className="space-y-6">
+      <AIInsightCard />
+      <HeroSection />
+  <KPIGrid />
+      
+      <div className="rounded-lg border overflow-hidden">
+        <TradingViewChart symbol="SPY" height={400} />
+      </div>
+    </div>
+  );
+}
+

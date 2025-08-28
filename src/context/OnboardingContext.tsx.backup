@@ -1,0 +1,151 @@
+﻿'use client';
+
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useAuth } from './AuthContext';
+
+interface OnboardingStep {
+  id: string;
+  title: string;
+  description: string;
+  component: string;
+  completed: boolean;
+}
+
+interface OnboardingContextType {
+  isOnboardingActive: boolean;
+  setIsOnboardingActive: (active: boolean) => void;
+  showWelcomeModal: boolean;
+  setShowWelcomeModal: (show: boolean) => void;
+  currentStep: number;
+  setCurrentStep: (step: number) => void;
+  steps: OnboardingStep[];
+  completeStep: (stepId: string) => void;
+  startOnboarding: () => void;
+  skipOnboarding: () => void;
+  progress: number;
+  completeOnboarding: () => void;
+  nextStep: () => void;
+  previousStep: () => void;
+}
+
+const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
+
+const defaultSteps: OnboardingStep[] = [
+  {
+    id: 'welcome',
+    title: 'Welcome to EdgeToEquity',
+    description: 'Your AI-powered trading psychology platform',
+    component: 'WelcomeStep',
+    completed: false
+  },
+  {
+    id: 'profile',
+    title: 'Set Up Your Profile',
+    description: 'Tell us about your trading experience',
+    component: 'ProfileStep',
+    completed: false
+  },
+  {
+    id: 'psychology',
+    title: 'Psychology Assessment',
+    description: 'Quick assessment to understand your trading mindset',
+    component: 'PsychologyStep',
+    completed: false
+  },
+  {
+    id: 'dashboard',
+    title: 'Explore Your Dashboard',
+    description: 'Learn about the key features available to you',
+    component: 'DashboardStep',
+    completed: false
+  }
+];
+
+export function OnboardingProvider({ children }: { children: ReactNode }) {
+  const authContext = useAuth();
+  const [isOnboardingActive, setIsOnboardingActive] = useState(false);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [steps, setSteps] = useState<OnboardingStep[]>(defaultSteps);
+
+  // Calculate progress
+  const progress = steps.filter(step => step.completed).length / steps.length * 100;
+
+  // Check if user needs onboarding
+  useEffect(() => {
+    if (authContext?.user && !authContext.user.hasCompletedOnboarding) {
+      setShowWelcomeModal(true);
+    }
+  }, [authContext?.user]);
+
+  const completeStep = (stepId: string) => {
+    setSteps(prev => prev.map(step => 
+      step.id === stepId ? { ...step, completed: true } : step
+    ));
+  };
+
+  const startOnboarding = () => {
+    setShowWelcomeModal(false);
+    setIsOnboardingActive(true);
+    setCurrentStep(0);
+  };
+
+  const skipOnboarding = () => {
+    setShowWelcomeModal(false);
+    setIsOnboardingActive(false);
+    completeOnboarding();
+  };
+
+  const completeOnboarding = () => {
+    setIsOnboardingActive(false);
+    // Update user to mark onboarding as completed
+    if (authContext?.updateUser) {
+      authContext.updateUser({ hasCompletedOnboarding: true });
+    }
+  };
+
+  const nextStep = () => {
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(prev => prev + 1);
+    } else {
+      completeOnboarding();
+    }
+  };
+
+  const previousStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep(prev => prev - 1);
+    }
+  };
+
+  const value = {
+    isOnboardingActive,
+    setIsOnboardingActive,
+    showWelcomeModal,
+    setShowWelcomeModal,
+    currentStep,
+    setCurrentStep,
+    steps,
+    completeStep,
+    startOnboarding,
+    skipOnboarding,
+    progress,
+    completeOnboarding,
+    nextStep,
+    previousStep
+  };
+
+  return (
+    <OnboardingContext.Provider value={value}>
+      {children}
+    </OnboardingContext.Provider>
+  );
+}
+
+export const useOnboarding = () => {
+  const context = useContext(OnboardingContext);
+  if (context === undefined) {
+    throw new Error('useOnboarding must be used within an OnboardingProvider');
+  }
+  return context;
+};

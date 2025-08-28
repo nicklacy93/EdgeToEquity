@@ -1,0 +1,22 @@
+﻿'use client';
+
+import { usePathname } from 'next/navigation';
+import FloatingChat from '@/components/FloatingChat';
+
+export default function EdgeBotAssistant() {
+  const path = usePathname();
+
+  const messages: Record<string, string> = {
+    '/dashboard': '👋 Welcome back! Want to analyze today\'s trades?',
+    '/strategies': '⚙️ Let\'s improve your strategy based on past data.',
+    '/psychology': '🧠 Detected some early exits — ready for a mindset review?',
+    '/analytics': '📊 Here’s your performance summary for the week.',
+  };
+
+  const message = messages[path] || '💡 I’m EdgeBot — here if you need help!';
+
+  return (
+    <FloatingChat message={message} />
+  );
+}
+

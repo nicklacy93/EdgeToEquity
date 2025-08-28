@@ -1,0 +1,149 @@
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
+import TypingBubble from "./TypingBubble";
+import BookmarkIcon from "./BookmarkIcon";
+import { useBookmarks } from "@/hooks/useBookmarks";
+import { sendToAI } from "@/utils/sendToAI";
+import ContextSidebar from "./ContextSidebar";
+
+interface ChatMessage {
+  id: string;
+  role: "user" | "bot";
+  content: string;
+  provider?: "Claude" | "OpenAI";
+}
+
+export default function EdgeBotChat() {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [selectedAgent, setSelectedAgent] = useState<
+    "strategy" | "debug" | "psychology" | "news" | "general"
+  >("strategy");
+
+  const { toggleBookmark, isBookmarked } = useBookmarks();
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    containerRef.current?.scrollTo({
+      top: containerRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [messages]);
+
+  const handleSubmit = async () => {
+    if (!input.trim()) return;
+    const newMessage: ChatMessage = {
+      id: Date.now().toString(),
+      role: "user",
+      content: input,
+    };
+    setMessages((prev) => [...prev, newMessage]);
+    setInput("");
+    setLoading(true);
+
+    const response = await sendToAI(input, selectedAgent);
+
+    if (response.success) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString() + "-bot",
+          role: "bot",
+          content: response.message || "(No response)",
+          provider: response.provider,
+        },
+      ]);
+    } else {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString() + "-bot",
+          role: "bot",
+          content: `❌ Error: ${response.message || "No response from AI."}`,
+          provider: response.provider,
+        },
+      ]);
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-md z-50 flex items-center justify-center">
+      <div className="bg-gray-900 text-white rounded-xl w-full max-w-3xl h-[500px] p-4 flex flex-col shadow-2xl border border-gray-700">
+        <div className="flex items-center justify-between mb-2">
+          <select
+            className="bg-gray-800 border border-gray-600 rounded px-3 py-1"
+            value={selectedAgent}
+            onChange={(e) => setSelectedAgent(e.target.value as any)}
+          >
+            <option value="strategy">Strategy</option>
+            <option value="debug">Debug</option>
+            <option value="psychology">Psychology</option>
+            <option value="news">News</option>
+            <option value="general">General</option>
+          </select>
+          <button
+            className="text-sm text-gray-400 hover:text-white"
+            onClick={() => window.location.reload()}
+          >
+            Close
+          </button>
+        </div>
+
+        <div
+          ref={containerRef}
+          className="flex-1 overflow-y-auto space-y-4 p-2 bg-gray-800 rounded"
+        >
+          {messages.map((msg) => (
+            <motion.div
+              key={msg.id}
+              initial={{ opacity: 0, x: msg.role === "user" ? 50 : -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3 }}
+              className={`p-3 rounded-lg max-w-[80%] whitespace-pre-wrap ${
+                msg.role === "user"
+                  ? "bg-purple-700 text-white self-end ml-auto"
+                  : "bg-green-700 text-white self-start mr-auto"
+              }`}
+            >
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-gray-200">
+                  {msg.role === "user" ? "You" : "EdgeBot"}
+                </span>
+                {msg.role === "bot" && (
+                  <BookmarkIcon
+                    bookmarked={isBookmarked(msg)}
+                    onClick={() => toggleBookmark(msg)}
+                  />
+                )}
+              </div>
+              {msg.content}
+            </motion.div>
+          ))}
+          {loading && <TypingBubble />}
+        </div>
+
+        <div className="mt-3 flex items-center gap-2">
+          <input
+            className="flex-1 p-2 rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none"
+            placeholder="Ask me anything..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+          />
+          <button
+            className="px-4 py-2 rounded bg-purple-600 hover:bg-purple-700"
+            onClick={handleSubmit}
+          >
+            Send
+          </button>
+        </div>
+      </div>
+
+      <ContextSidebar messages={messages} />
+    </div>
+  );
+}

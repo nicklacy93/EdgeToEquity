@@ -1,0 +1,1114 @@
+'use client'
+
+import React, { useState, useEffect } from 'react';
+import { 
+  TrendingUp, Brain, MessageCircle, BarChart3, Target, BookOpen, Clock, Settings, 
+  ChevronDown, Search, Zap, X, AlertTriangle, CheckCircle, XCircle, TrendingDown,
+  Activity, DollarSign, Percent, Eye, Filter, Calendar, Map, Layers
+} from 'lucide-react';
+
+const AdvancedTradingDashboard = () => {
+  const [selectedAgent, setSelectedAgent] = useState(null);
+  const [activeTab, setActiveTab] = useState('live');
+  const [showAgentSelector, setShowAgentSelector] = useState(false);
+  const [hoveredAgent, setHoveredAgent] = useState(null);
+  const [selectedTrade, setSelectedTrade] = useState(null);
+  const [chartMode, setChartMode] = useState('live'); // live, backtest, strategy
+  const [showInsights, setShowInsights] = useState(true);
+  const [showTradeEntry, setShowTradeEntry] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [animatingMetrics, setAnimatingMetrics] = useState(new Set());
+  const [tradeForm, setTradeForm] = useState({
+    symbol: 'SPY',
+    action: 'BUY',
+    entry: '625.34',
+    size: '',
+    stopLoss: '',
+    takeProfit: '',
+    timeframe: '5m',
+    setup: '',
+    confidence: 7,
+    emotion: 'neutral'
+  });
+
+  const agents = [
+    { 
+      id: 'strategy', 
+      name: 'Strategy Architect', 
+      icon: TrendingUp, 
+      color: 'from-blue-500 to-cyan-500',
+      tagline: '"Let\'s build your edge, step by step"',
+      description: 'Trade planning, risk assessment, system building',
+      recommended: false,
+      preview: "I'd help you systematize your 87% execution into a repeatable framework..."
+    },
+    { 
+      id: 'mindset', 
+      name: 'Mindset Mirror', 
+      icon: Brain, 
+      color: 'from-purple-500 to-pink-500',
+      tagline: '"I see what you\'re feeling—let\'s work through it"',
+      description: 'Emotional regulation, tilt recovery, confidence',
+      recommended: false,
+      preview: "I notice you're rebuilding - let's work through any mental blocks together..."
+    },
+    { 
+      id: 'detective', 
+      name: 'Performance Detective', 
+      icon: Search, 
+      color: 'from-green-500 to-teal-500',
+      tagline: '"Your numbers tell a story—let\'s decode it"',
+      description: 'Trade review, pattern analysis, improvement gaps',
+      recommended: true,
+      preview: "With 87% execution accuracy, there's hidden alpha in your data to uncover..."
+    },
+    { 
+      id: 'journal', 
+      name: 'Trade Journal', 
+      icon: BookOpen, 
+      color: 'from-indigo-500 to-purple-500',
+      tagline: '"Every trade tells a story—let\'s write yours"',
+      description: 'Trade logging, performance review, strategy compliance',
+      recommended: false,
+      preview: "I'll help you log trades and identify patterns in your decision-making..."
+    },
+    { 
+      id: 'session', 
+      name: 'Session Specialist', 
+      icon: Zap, 
+      color: 'from-orange-500 to-red-500',
+      tagline: '"Ready to make today count?"',
+      description: 'Pre-market prep, live coaching, wrap-up insights',
+      recommended: false,
+      preview: "Let's channel your strong execution skills into today's opportunities..."
+    }
+  ];
+
+  const trades = [
+    { 
+      id: 1, 
+      symbol: 'SPY', 
+      entry: 624.50, 
+      exit: 627.20, 
+      size: 100, 
+      pnl: 270, 
+      time: '10:30 AM',
+      compliance: 'good', // good, warning, violation
+      reason: 'Followed plan perfectly',
+      leverage: 1.2,
+      emotion: 'confident'
+    },
+    { 
+      id: 2, 
+      symbol: 'QQQ', 
+      entry: 485.20, 
+      exit: 483.80, 
+      size: 200, 
+      pnl: -280, 
+      time: '11:45 AM',
+      compliance: 'violation',
+      reason: 'Oversized position, emotional entry',
+      leverage: 2.8,
+      emotion: 'revenge'
+    },
+    { 
+      id: 3, 
+      symbol: 'AAPL', 
+      entry: 178.90, 
+      exit: null, 
+      size: 50, 
+      pnl: 125, 
+      time: '2:15 PM',
+      compliance: 'warning',
+      reason: 'Good setup, slightly large size',
+      leverage: 1.8,
+      emotion: 'cautious'
+    }
+  ];
+
+  const strategySignals = [
+    { symbol: 'TSLA', price: 412.50, signal: 'BUY', confidence: 85, reason: 'Breakout above resistance' },
+    { symbol: 'NVDA', price: 875.20, signal: 'SELL', confidence: 72, reason: 'Overbought RSI divergence' },
+    { symbol: 'MSFT', price: 445.80, signal: 'WATCH', confidence: 65, reason: 'Approaching key level' }
+  ];
+
+  const performanceMetrics = [
+    { label: 'Win Rate', value: '68%', change: '+2.1%', color: 'text-green-400' },
+    { label: 'Profit Factor', value: '2.4', change: '+0.3', color: 'text-blue-400' },
+    { label: 'Avg R:R', value: '3.0', change: '+0.2', color: 'text-purple-400' },
+    { label: 'Execution', value: '87%', change: '-1.2%', color: 'text-orange-400' },
+    { label: 'Max DD', value: '4.2%', change: '-0.8%', color: 'text-red-400' },
+    { label: 'Sharpe', value: '1.8', change: '+0.1', color: 'text-cyan-400' }
+  ];
+
+  const handleAgentSelect = (agent) => {
+    setSelectedAgent(agent);
+    setShowAgentSelector(false);
+  };
+
+  const handleTradeFormChange = (field, value) => {
+    setTradeForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleTradeSubmit = () => {
+    // Here you would save the trade to your database
+    console.log('Trade submitted:', tradeForm);
+    setShowTradeEntry(false);
+    
+    // Add success notification
+    const notification = {
+      id: Date.now(),
+      type: 'success',
+      message: `${tradeForm.action} ${tradeForm.symbol} logged successfully`,
+      timestamp: Date.now()
+    };
+    setNotifications(prev => [...prev, notification]);
+    
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+      setNotifications(prev => prev.filter(n => n.id !== notification.id));
+    }, 3000);
+  };
+
+  // Simulate metric animation
+  const animateMetric = (index) => {
+    setAnimatingMetrics(prev => new Set(prev).add(index));
+    setTimeout(() => {
+      setAnimatingMetrics(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(index);
+        return newSet;
+      });
+    }, 800);
+  };
+
+  const chartModes = [
+    { id: 'live', label: 'Live Trading', icon: Activity },
+    { id: 'backtest', label: 'Trade Review', icon: Calendar },
+    { id: 'strategy', label: 'Strategy View', icon: Map }
+  ];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-blue-900 text-white">
+      {/* Header */}
+      <div className="border-b border-slate-700 bg-slate-800/50 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-6">
+              <h1 className="text-xl font-bold text-blue-400">EdgeToEquity</h1>
+              <div className="flex items-center gap-4">
+                {chartModes.map((mode) => (
+                  <button
+                    key={mode.id}
+                    onClick={() => setChartMode(mode.id)}
+                    className={`flex items-center gap-2 px-3 py-1 rounded-lg text-sm transition-colors ${
+                      chartMode === mode.id 
+                        ? 'bg-blue-600 text-white' 
+                        : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                    }`}
+                  >
+                    <mode.icon className="w-4 h-4" />
+                    {mode.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 text-sm">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <span>Market Open</span>
+              </div>
+              <button 
+                onClick={() => setShowInsights(!showInsights)}
+                className={`p-2 rounded-lg transition-colors ${showInsights ? 'bg-blue-600' : 'bg-slate-700 hover:bg-slate-600'}`}
+              >
+                <Eye className="w-4 h-4" />
+              </button>
+              <Settings className="w-5 h-5 text-slate-400 hover:text-white cursor-pointer" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Smart Notifications */}
+      <div className="fixed top-4 right-4 z-40 space-y-2">
+        {notifications.map((notification) => (
+          <div
+            key={notification.id}
+            className="bg-slate-800/90 backdrop-blur-md border border-green-500/50 rounded-xl p-4 shadow-xl animate-in slide-in-from-right-5 duration-300"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span className="text-sm font-medium text-green-300">{notification.message}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Performance Metrics Bar */}
+      <div className="bg-gradient-to-r from-blue-600/20 to-cyan-600/20 border-b border-blue-500/30 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="grid grid-cols-6 gap-6">
+            {performanceMetrics.map((metric, idx) => (
+              <div 
+                key={idx} 
+                className={`text-center group cursor-pointer transition-all duration-300 hover:scale-105 ${
+                  animatingMetrics.has(idx) ? 'animate-pulse' : ''
+                }`}
+                onClick={() => animateMetric(idx)}
+              >
+                <div className={`text-2xl font-bold mb-1 transition-all duration-500 ${metric.color} ${
+                  animatingMetrics.has(idx) ? 'scale-110' : ''
+                }`}>
+                  {metric.value}
+                </div>
+                <div className="text-xs text-slate-400 flex items-center justify-center gap-2">
+                  <span className="font-medium">{metric.label}</span>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-semibold transition-all duration-300 ${
+                    metric.change.startsWith('+') 
+                      ? 'text-green-300 bg-green-500/20 group-hover:bg-green-500/30' 
+                      : 'text-red-300 bg-red-500/20 group-hover:bg-red-500/30'
+                  }`}>
+                    {metric.change}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Main Dashboard */}
+      <div className="max-w-7xl mx-auto p-6">
+        <div className="grid grid-cols-12 gap-6 h-[calc(100vh-400px)]">
+          
+          {/* Chart Section with AI Insights */}
+          <div className="col-span-7 bg-slate-800/30 backdrop-blur-sm rounded-xl border border-slate-700 overflow-hidden group hover:border-slate-600 transition-all duration-300 hover:shadow-2xl hover:shadow-blue-500/10">
+            <div className="bg-slate-800/50 border-b border-slate-700 p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <BarChart3 className="w-5 h-5 text-blue-400 transition-transform group-hover:scale-110" />
+                  <span className="font-medium">SPDR S&P 500 ETF Trust</span>
+                  <span className="text-green-400 text-sm font-semibold px-2 py-1 bg-green-500/20 rounded-full">
+                    +4.89 (+0.79%)
+                  </span>
+                  {chartMode === 'strategy' && (
+                    <span className="px-3 py-1 bg-blue-600 text-xs rounded-full font-medium animate-pulse">
+                      Strategy Active
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  <button 
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-medium transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-blue-500/30"
+                    onClick={() => setShowTradeEntry(true)}
+                  >
+                    Mark Trade
+                  </button>
+                  <button className="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-all duration-200">
+                    <Layers className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            {/* Chart with Overlays */}
+            <div className="relative h-full bg-slate-900/50">
+              {/* Chart Placeholder */}
+              <div className="absolute inset-4 bg-slate-800/50 rounded-lg flex items-center justify-center">
+                <div className="text-center">
+                  <BarChart3 className="w-16 h-16 text-slate-600 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-slate-400 mb-2">
+                    {chartMode === 'live' ? 'Live Chart' : 
+                     chartMode === 'backtest' ? 'Trade Analysis View' : 
+                     'Strategy Visualization'}
+                  </h3>
+                  <p className="text-sm text-slate-500">
+                    {chartMode === 'live' ? 'Real-time market data' : 
+                     chartMode === 'backtest' ? 'Historical trades with AI insights' : 
+                     'Strategy signals and setups'}
+                  </p>
+                </div>
+              </div>
+
+              {/* AI Insights Overlay */}
+              {showInsights && (
+                <div className="absolute top-4 right-4 space-y-2 max-w-xs">
+                  {chartMode === 'live' && (
+                    <div className="bg-blue-600/90 backdrop-blur-md rounded-xl p-4 border border-blue-500/50 shadow-xl animate-in slide-in-from-right-5 duration-500">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Target className="w-4 h-4 animate-pulse" />
+                        <span className="text-sm font-semibold">Live Signal</span>
+                      </div>
+                      <p className="text-xs leading-relaxed">Strong support at 624.50. Consider entry on bounce.</p>
+                      <div className="mt-2 w-full bg-blue-500/20 rounded-full h-1">
+                        <div className="bg-blue-300 h-1 rounded-full w-3/4 animate-pulse"></div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {chartMode === 'backtest' && selectedTrade && (
+                    <div className="bg-red-600/90 backdrop-blur-md rounded-xl p-4 border border-red-500/50 shadow-xl animate-in slide-in-from-right-5 duration-500">
+                      <div className="flex items-center gap-2 mb-2">
+                        <AlertTriangle className="w-4 h-4 animate-bounce" />
+                        <span className="text-sm font-semibold">Risk Alert</span>
+                      </div>
+                      <p className="text-xs leading-relaxed">Position size 2.8x normal. Emotional entry detected.</p>
+                    </div>
+                  )}
+
+                  {chartMode === 'strategy' && (
+                    <div className="bg-green-600/90 backdrop-blur-md rounded-xl p-4 border border-green-500/50 shadow-xl animate-in slide-in-from-right-5 duration-500">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CheckCircle className="w-4 h-4 animate-pulse" />
+                        <span className="text-sm font-semibold">Strategy Signal</span>
+                      </div>
+                      <p className="text-xs leading-relaxed">Breakout pattern matches your criteria. 85% confidence.</p>
+                      <div className="mt-2 flex items-center gap-2">
+                        <div className="w-full bg-green-500/20 rounded-full h-1">
+                          <div className="bg-green-300 h-1 rounded-full w-5/6"></div>
+                        </div>
+                        <span className="text-xs font-semibold">85%</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Trade Markers */}
+              {chartMode === 'backtest' && (
+                <div className="absolute bottom-4 left-4 right-4">
+                  <div className="flex gap-2 justify-center">
+                    {trades.map((trade) => (
+                      <button
+                        key={trade.id}
+                        onClick={() => setSelectedTrade(trade)}
+                        className={`p-2 rounded-full border-2 transition-all ${
+                          trade.compliance === 'good' ? 'bg-green-600 border-green-400' :
+                          trade.compliance === 'warning' ? 'bg-yellow-600 border-yellow-400' :
+                          'bg-red-600 border-red-400'
+                        } ${selectedTrade?.id === trade.id ? 'scale-125 shadow-lg' : 'hover:scale-110'}`}
+                      >
+                        <span className="text-xs font-bold">{trade.id}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* EdgeBot Chat */}
+          <div className="col-span-3 bg-slate-800/30 backdrop-blur-sm rounded-xl border border-slate-700 flex flex-col group hover:border-slate-600 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/10">
+            <div className="bg-slate-800/50 border-b border-slate-700 p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <MessageCircle className="w-5 h-5 text-blue-400 transition-transform group-hover:scale-110" />
+                  <span className="font-medium">EdgeBot</span>
+                  {selectedAgent && (
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  )}
+                </div>
+                <button 
+                  className="flex items-center gap-2 px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm transition-all duration-200 hover:scale-105"
+                  onClick={() => setShowAgentSelector(true)}
+                >
+                  {selectedAgent ? (
+                    <>
+                      <selectedAgent.icon className="w-4 h-4" />
+                      <span>{selectedAgent.name}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Brain className="w-4 h-4" />
+                      <span>Choose Coach</span>
+                    </>
+                  )}
+                  <ChevronDown className="w-4 h-4 transition-transform group-hover:rotate-180" />
+                </button>
+              </div>
+            </div>
+
+            {/* Chat Messages */}
+            <div className="flex-1 p-4 space-y-4 overflow-y-auto">
+              {selectedAgent ? (
+                <div className="space-y-4">
+                  <div className="bg-slate-700 p-3 rounded-lg border-l-4 border-blue-400">
+                    <div className="text-xs text-slate-300 mb-1">{selectedAgent.name}</div>
+                    <p className="text-sm">
+                      {chartMode === 'live' && "I can see SPY testing resistance at 625. What's your read on this breakout attempt?"}
+                      {chartMode === 'backtest' && selectedTrade && `Looking at trade #${selectedTrade.id}, I notice you went ${selectedTrade.leverage}x your normal size. What was driving that decision?`}
+                      {chartMode === 'strategy' && "Your strategy is flagging TSLA for a potential breakout. The setup matches your criteria with 85% confidence."}
+                      {chartMode === 'backtest' && !selectedTrade && "I've analyzed your recent trades. That QQQ position shows signs of revenge trading. Want to explore what triggered it?"}
+                    </p>
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-xs text-slate-400">2:34 PM</span>
+                      <BookOpen className="w-3 h-3 text-slate-400 hover:text-white cursor-pointer" />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Brain className="w-12 h-12 text-slate-500 mx-auto mb-4" />
+                  <p className="text-slate-400 mb-4">Choose a coach to analyze your {chartMode} data</p>
+                  <button
+                    onClick={() => setShowAgentSelector(true)}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                  >
+                    Choose Your Coach
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Context-Aware Input */}
+            <div className="border-t border-slate-700 p-4">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder={
+                    chartMode === 'live' ? "Ask about this chart setup..." :
+                    chartMode === 'backtest' ? "Why did I make this trade?" :
+                    "How does this strategy signal look?"
+                  }
+                  className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-blue-500"
+                />
+                <button className="px-3 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">
+                  <MessageCircle className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Analytics Panel */}
+          <div className="col-span-2 space-y-4">
+            {/* Strategy Signals */}
+            {chartMode === 'strategy' && (
+              <div className="bg-slate-800/30 backdrop-blur-sm rounded-xl border border-slate-700 p-4">
+                <h3 className="font-medium mb-3 flex items-center gap-2">
+                  <Target className="w-4 h-4" />
+                  Strategy Signals
+                </h3>
+                <div className="space-y-2">
+                  {strategySignals.map((signal, idx) => (
+                    <div key={idx} className="p-2 bg-slate-700 rounded-lg">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium">{signal.symbol}</span>
+                        <span className={`text-xs px-2 py-1 rounded ${
+                          signal.signal === 'BUY' ? 'bg-green-600' :
+                          signal.signal === 'SELL' ? 'bg-red-600' : 'bg-yellow-600'
+                        }`}>
+                          {signal.signal}
+                        </span>
+                      </div>
+                      <div className="text-xs text-slate-400">{signal.reason}</div>
+                      <div className="text-xs text-blue-400">{signal.confidence}% confidence</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Trade Analysis */}
+            {chartMode === 'backtest' && (
+              <div className="bg-slate-800/30 backdrop-blur-sm rounded-xl border border-slate-700 p-4">
+                <h3 className="font-medium mb-3 flex items-center gap-2">
+                  <Search className="w-4 h-4" />
+                  Trade Analysis
+                </h3>
+                <div className="space-y-2">
+                  {trades.map((trade) => (
+                    <button
+                      key={trade.id}
+                      onClick={() => setSelectedTrade(trade)}
+                      className={`w-full p-2 rounded-lg text-left transition-colors ${
+                        selectedTrade?.id === trade.id ? 'bg-blue-600' : 'bg-slate-700 hover:bg-slate-600'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium">{trade.symbol}</span>
+                        <div className="flex items-center gap-1">
+                          {trade.compliance === 'good' && <CheckCircle className="w-3 h-3 text-green-400" />}
+                          {trade.compliance === 'warning' && <AlertTriangle className="w-3 h-3 text-yellow-400" />}
+                          {trade.compliance === 'violation' && <XCircle className="w-3 h-3 text-red-400" />}
+                          <span className={`text-xs ${trade.pnl > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            ${trade.pnl}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-xs text-slate-400">{trade.reason}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Session Tools */}
+            <div className="bg-slate-800/30 backdrop-blur-sm rounded-xl border border-slate-700 p-4">
+              <h3 className="font-medium mb-3 flex items-center gap-2">
+                <Activity className="w-4 h-4" />
+                Session Tools
+              </h3>
+              <div className="space-y-2">
+                <button 
+                  className="w-full flex items-center gap-2 px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm transition-colors"
+                  onClick={() => setShowTradeEntry(true)}
+                >
+                  <Target className="w-4 h-4" />
+                  Mark Trade
+                </button>
+                <button className="w-full flex items-center gap-2 px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm transition-colors">
+                  <Brain className="w-4 h-4" />
+                  Mood Check
+                </button>
+                <button className="w-full flex items-center gap-2 px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm transition-colors">
+                  <BookOpen className="w-4 h-4" />
+                  Export Journal
+                </button>
+              </div>
+            </div>
+
+            {/* Performance Snapshot */}
+            <div className="bg-slate-800/30 backdrop-blur-sm rounded-xl border border-slate-700 p-4">
+              <h3 className="font-medium mb-3 flex items-center gap-2">
+                <BarChart3 className="w-4 h-4" />
+                Today's Session
+              </h3>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Trades</span>
+                  <span className="text-white">3</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">P&L</span>
+                  <span className="text-green-400">+$115</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Win Rate</span>
+                  <span className="text-white">67%</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Compliance</span>
+                  <span className="text-yellow-400">67%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Enhancement Section */}
+        <div className="mt-6 grid grid-cols-12 gap-6">
+          
+          {/* Market Sentiment & News */}
+          <div className="col-span-4 bg-slate-800/30 backdrop-blur-sm rounded-xl border border-slate-700 p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-medium flex items-center gap-2">
+                <Activity className="w-4 h-4 text-green-400" />
+                Market Sentiment
+              </h3>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <span className="text-xs text-slate-400">Live</span>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              {/* Sentiment Gauge */}
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-slate-400">Fear & Greed Index</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-16 h-2 bg-slate-700 rounded-full overflow-hidden">
+                    <div className="w-3/4 h-full bg-gradient-to-r from-red-500 to-green-500 rounded-full"></div>
+                  </div>
+                  <span className="text-sm text-green-400">74</span>
+                </div>
+              </div>
+              
+              {/* Key News */}
+              <div className="space-y-2">
+                <div className="text-xs text-slate-500 uppercase tracking-wide">Market Moving News</div>
+                <div className="space-y-1">
+                  <div className="text-xs text-slate-300 p-2 bg-slate-700/50 rounded flex items-start gap-2">
+                    <div className="w-1 h-1 bg-red-400 rounded-full mt-1.5 flex-shrink-0"></div>
+                    <span>Fed officials signal potential rate pause ahead of FOMC</span>
+                  </div>
+                  <div className="text-xs text-slate-300 p-2 bg-slate-700/50 rounded flex items-start gap-2">
+                    <div className="w-1 h-1 bg-green-400 rounded-full mt-1.5 flex-shrink-0"></div>
+                    <span>Tech earnings beat expectations, NVDA up 3.2% pre-market</span>
+                  </div>
+                  <div className="text-xs text-slate-300 p-2 bg-slate-700/50 rounded flex items-start gap-2">
+                    <div className="w-1 h-1 bg-blue-400 rounded-full mt-1.5 flex-shrink-0"></div>
+                    <span>SPY options flow shows heavy call activity at 630 strike</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Psychology Timeline */}
+          <div className="col-span-5 bg-slate-800/30 backdrop-blur-sm rounded-xl border border-slate-700 p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-medium flex items-center gap-2">
+                <Brain className="w-4 h-4 text-purple-400" />
+                Trading Psychology Timeline
+              </h3>
+              <button className="text-xs text-slate-400 hover:text-white">View Full Day</button>
+            </div>
+            
+            <div className="relative">
+              {/* Timeline */}
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-slate-400">9:30 AM</span>
+                <span className="text-xs text-slate-400">12:00 PM</span>
+                <span className="text-xs text-slate-400">2:30 PM</span>
+                <span className="text-xs text-slate-400">4:00 PM</span>
+              </div>
+              
+              <div className="relative h-8 bg-slate-700 rounded-lg overflow-hidden">
+                {/* Emotion bands */}
+                <div className="absolute inset-0 flex">
+                  <div className="w-1/4 bg-green-500/30 border-r border-slate-600"></div>
+                  <div className="w-1/4 bg-yellow-500/30 border-r border-slate-600"></div>
+                  <div className="w-1/4 bg-red-500/30 border-r border-slate-600"></div>
+                  <div className="w-1/4 bg-blue-500/30"></div>
+                </div>
+                
+                {/* Trade markers */}
+                <div className="absolute top-1 left-1/6 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-xs font-bold">1</div>
+                <div className="absolute top-1 left-2/5 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-xs font-bold">2</div>
+                <div className="absolute top-1 left-3/5 w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center text-xs font-bold">3</div>
+              </div>
+              
+              <div className="flex items-center justify-between mt-2">
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-xs text-slate-400">Confident</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                  <span className="text-xs text-slate-400">Cautious</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                  <span className="text-xs text-slate-400">Emotional</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                  <span className="text-xs text-slate-400">Focused</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Current mood insight */}
+            <div className="mt-3 p-2 bg-blue-600/20 border border-blue-500/30 rounded-lg">
+              <div className="flex items-center gap-2">
+                <Brain className="w-3 h-3 text-blue-400" />
+                <span className="text-xs text-blue-300">You're in your optimal trading zone. Confidence is high but controlled.</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Actions Command Center */}
+          <div className="col-span-3 bg-slate-800/30 backdrop-blur-sm rounded-xl border border-slate-700 p-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-medium flex items-center gap-2">
+                <Zap className="w-4 h-4 text-orange-400" />
+                Quick Actions
+              </h3>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-2">
+              <button className="flex flex-col items-center gap-1 p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors group">
+                <DollarSign className="w-4 h-4 text-green-400 group-hover:scale-110 transition-transform" />
+                <span className="text-xs">P&L Report</span>
+              </button>
+              
+              <button className="flex flex-col items-center gap-1 p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors group">
+                <Calendar className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" />
+                <span className="text-xs">Schedule</span>
+              </button>
+              
+              <button className="flex flex-col items-center gap-1 p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors group">
+                <Filter className="w-4 h-4 text-purple-400 group-hover:scale-110 transition-transform" />
+                <span className="text-xs">Screener</span>
+              </button>
+              
+              <button className="flex flex-col items-center gap-1 p-3 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors group">
+                <Settings className="w-4 h-4 text-slate-400 group-hover:scale-110 transition-transform" />
+                <span className="text-xs">Settings</span>
+              </button>
+              
+              <button className="col-span-2 flex items-center justify-center gap-2 p-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">
+                <Target className="w-4 h-4" />
+                <span className="text-xs font-medium">Emergency Stop All</span>
+              </button>
+            </div>
+            
+            {/* Platform Status */}
+            <div className="mt-3 space-y-1">
+              <div className="text-xs text-slate-500 uppercase tracking-wide">Platform Status</div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-slate-400">TradingView</span>
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-slate-400">Market Data</span>
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-slate-400">EdgeBot AI</span>
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-slate-400">Trade Journal</span>
+                <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Coach Selection Modal */}
+      {showAgentSelector && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-slate-800 rounded-xl border border-slate-600 p-6 max-w-3xl w-full mx-4">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Brain className="w-6 h-6 text-pink-400" />
+                  <h2 className="text-xl font-bold text-white">Choose Your Trading Coach</h2>
+                </div>
+                <p className="text-sm text-slate-400">
+                  Based on your {chartMode} analysis, we recommend the {
+                    chartMode === 'backtest' ? 'Performance Detective' :
+                    chartMode === 'strategy' ? 'Strategy Architect' : 'Session Specialist'
+                  }
+                </p>
+              </div>
+              <button 
+                onClick={() => setShowAgentSelector(false)}
+                className="text-slate-400 hover:text-white transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              {agents.map((agent) => (
+                <button
+                  key={agent.id}
+                  onClick={() => handleAgentSelect(agent)}
+                  onMouseEnter={() => setHoveredAgent(agent)}
+                  onMouseLeave={() => setHoveredAgent(null)}
+                  className={`group relative border rounded-xl p-4 text-left transition-all duration-300 transform hover:-translate-y-1 ${
+                    (chartMode === 'backtest' && agent.id === 'detective') ||
+                    (chartMode === 'strategy' && agent.id === 'strategy') ||
+                    (chartMode === 'live' && agent.id === 'session')
+                      ? 'bg-green-500/10 border-green-500/50 hover:border-green-400 hover:shadow-lg hover:shadow-green-500/20' 
+                      : 'bg-slate-700/50 hover:bg-slate-600/50 border-slate-600 hover:border-blue-400 hover:shadow-lg hover:shadow-blue-500/20'
+                  }`}
+                >
+                  {((chartMode === 'backtest' && agent.id === 'detective') ||
+                    (chartMode === 'strategy' && agent.id === 'strategy') ||
+                    (chartMode === 'live' && agent.id === 'session')) && (
+                    <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                      Recommended
+                    </div>
+                  )}
+                  
+                  <div className={`absolute top-3 right-3 w-3 h-3 rounded-full animate-pulse`} 
+                       style={{background: `linear-gradient(135deg, ${agent.color.includes('blue') ? '#3B82F6, #06B6D4' : agent.color.includes('purple') ? '#8B5CF6, #EC4899' : agent.color.includes('green') ? '#10B981, #14B8A6' : agent.color.includes('indigo') ? '#6366F1, #8B5CF6' : '#F97316, #EF4444'})`}}>
+                  </div>
+                  
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`p-3 rounded-xl bg-gradient-to-r ${agent.color} shadow-lg`}>
+                      <agent.icon className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-white text-sm">{agent.name}</h3>
+                    </div>
+                  </div>
+                  
+                  <p className="text-xs text-blue-300 mb-2 italic font-medium">{agent.tagline}</p>
+                  <p className="text-xs text-slate-400 leading-relaxed">Best for: {agent.description}</p>
+                  
+                  {hoveredAgent?.id === agent.id && (
+                    <div className="mt-3 p-3 bg-slate-800/70 rounded-lg border border-slate-600 animate-in slide-in-from-top-2 duration-200">
+                      <p className="text-xs text-slate-300 italic">"{agent.preview}"</p>
+                    </div>
+                  )}
+                </button>
+              ))}
+            </div>
+            
+            {/* Continue Previous Session */}
+            <div className="pt-4 border-t border-slate-600">
+              <button className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-slate-700/50 hover:bg-slate-600/50 border border-slate-600 hover:border-slate-500 rounded-xl text-sm transition-all duration-200">
+                <MessageCircle className="w-4 h-4" />
+                <span>Continue Previous Session with Strategy Architect</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Smart Trade Entry Modal */}
+      {showTradeEntry && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-slate-800 rounded-xl border border-slate-600 p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Target className="w-6 h-6 text-blue-400" />
+                  <h2 className="text-xl font-bold text-white">Log Trade Entry</h2>
+                </div>
+                <p className="text-sm text-slate-400">Chart detected SPY at $625.34 - logging this trade?</p>
+              </div>
+              <button 
+                onClick={() => setShowTradeEntry(false)}
+                className="text-slate-400 hover:text-white transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-6">
+              {/* Left Column - Trade Details */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Symbol & Action</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={tradeForm.symbol}
+                      onChange={(e) => handleTradeFormChange('symbol', e.target.value)}
+                      className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+                      placeholder="SPY"
+                    />
+                    <select
+                      value={tradeForm.action}
+                      onChange={(e) => handleTradeFormChange('action', e.target.value)}
+                      className="bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+                    >
+                      <option value="BUY">BUY</option>
+                      <option value="SELL">SELL</option>
+                      <option value="SHORT">SHORT</option>
+                      <option value="COVER">COVER</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Entry Price</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={tradeForm.entry}
+                      onChange={(e) => handleTradeFormChange('entry', e.target.value)}
+                      className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+                      placeholder="625.34"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Position Size</label>
+                    <input
+                      type="number"
+                      value={tradeForm.size}
+                      onChange={(e) => handleTradeFormChange('size', e.target.value)}
+                      className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+                      placeholder="100 shares"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Stop Loss</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={tradeForm.stopLoss}
+                      onChange={(e) => handleTradeFormChange('stopLoss', e.target.value)}
+                      className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+                      placeholder="620.00"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">Take Profit</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={tradeForm.takeProfit}
+                      onChange={(e) => handleTradeFormChange('takeProfit', e.target.value)}
+                      className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+                      placeholder="630.00"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Timeframe</label>
+                  <select
+                    value={tradeForm.timeframe}
+                    onChange={(e) => handleTradeFormChange('timeframe', e.target.value)}
+                    className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+                  >
+                    <option value="1m">1 Minute</option>
+                    <option value="5m">5 Minutes</option>
+                    <option value="15m">15 Minutes</option>
+                    <option value="1h">1 Hour</option>
+                    <option value="4h">4 Hours</option>
+                    <option value="1d">Daily</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Right Column - Psychology & AI Insights */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Setup Description</label>
+                  <textarea
+                    value={tradeForm.setup}
+                    onChange={(e) => handleTradeFormChange('setup', e.target.value)}
+                    className="w-full h-20 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500 resize-none"
+                    placeholder="Breakout above resistance, high volume..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Confidence Level: {tradeForm.confidence}/10
+                  </label>
+                  <input
+                    type="range"
+                    min="1"
+                    max="10"
+                    value={tradeForm.confidence}
+                    onChange={(e) => handleTradeFormChange('confidence', e.target.value)}
+                    className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer"
+                  />
+                  <div className="flex justify-between text-xs text-slate-400 mt-1">
+                    <span>Low</span>
+                    <span>Medium</span>
+                    <span>High</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Current Emotion</label>
+                  <select
+                    value={tradeForm.emotion}
+                    onChange={(e) => handleTradeFormChange('emotion', e.target.value)}
+                    className="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+                  >
+                    <option value="confident">😎 Confident</option>
+                    <option value="neutral">😐 Neutral</option>
+                    <option value="cautious">🤔 Cautious</option>
+                    <option value="excited">😤 Excited</option>
+                    <option value="nervous">😰 Nervous</option>
+                    <option value="frustrated">😤 Frustrated</option>
+                  </select>
+                </div>
+
+                {/* AI Risk Assessment */}
+                <div className="bg-slate-700/50 border border-slate-600 rounded-lg p-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Brain className="w-4 h-4 text-purple-400" />
+                    <span className="text-sm font-medium text-slate-300">AI Risk Assessment</span>
+                  </div>
+                  <div className="space-y-2 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-400">Position Size vs Account</span>
+                      <span className="text-green-400">✓ Safe (2.1%)</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-400">Risk/Reward Ratio</span>
+                      <span className="text-green-400">✓ Good (1:2.1)</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-400">Market Conditions</span>
+                      <span className="text-yellow-400">⚠ High Vol</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick Setup Templates */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Quick Templates</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button 
+                      className="p-2 bg-slate-700 hover:bg-slate-600 rounded text-xs transition-colors"
+                      onClick={() => handleTradeFormChange('setup', 'Breakout above resistance with volume confirmation')}
+                    >
+                      📈 Breakout
+                    </button>
+                    <button 
+                      className="p-2 bg-slate-700 hover:bg-slate-600 rounded text-xs transition-colors"
+                      onClick={() => handleTradeFormChange('setup', 'Pullback to support level, bounce expected')}
+                    >
+                      🔄 Pullback
+                    </button>
+                    <button 
+                      className="p-2 bg-slate-700 hover:bg-slate-600 rounded text-xs transition-colors"
+                      onClick={() => handleTradeFormChange('setup', 'Mean reversion at oversold levels')}
+                    >
+                      ⚖️ Mean Rev
+                    </button>
+                    <button 
+                      className="p-2 bg-slate-700 hover:bg-slate-600 rounded text-xs transition-colors"
+                      onClick={() => handleTradeFormChange('setup', 'Momentum continuation on trend')}
+                    >
+                      🚀 Momentum
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* AI Suggestions */}
+            <div className="mt-6 p-4 bg-blue-600/20 border border-blue-500/30 rounded-lg">
+              <div className="flex items-start gap-3">
+                <Brain className="w-5 h-5 text-blue-400 mt-0.5" />
+                <div>
+                  <h4 className="text-sm font-medium text-blue-300 mb-1">EdgeBot Suggestion</h4>
+                  <p className="text-xs text-blue-200">
+                    Based on your 87% execution accuracy and current market conditions, this setup aligns well with your strategy. 
+                    Consider reducing position size slightly due to higher volatility today. Your confidence level of {tradeForm.confidence}/10 suggests you're feeling good about this trade.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setShowTradeEntry(false)}
+                className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 border border-slate-600 rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleTradeSubmit}
+                className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors font-medium"
+              >
+                Log Trade Entry
+              </button>
+              <button
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
+                onClick={() => {
+                  handleTradeSubmit();
+                  setSelectedAgent(agents.find(a => a.id === 'journal'));
+                }}
+              >
+                Log & Chat with Journal Agent
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default AdvancedTradingDashboard;
