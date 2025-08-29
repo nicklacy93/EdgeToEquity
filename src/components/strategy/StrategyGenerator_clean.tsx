@@ -2086,7 +2086,7 @@ const CodeOutput = ({ generatedCode, confidence, isGenerating, selectedPlatform,
         </div>
     );
 };
-                        { / *   F l o a t i n g   E d g e B o t   A s s i s t a n t   * / } 
+                        { / *   F l o a t i n g   E d g e B o t   A s s i s t a n t   * /  } 
  
                          < F l o a t i n g E d g e B o t   / > 
  

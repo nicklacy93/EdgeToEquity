@@ -634,8 +634,8 @@ export default function EnhancedQuickActionsPanel({
               className="overflow-hidden"
             >
               <div className={`grid gap-4 ${section.id === 'recommended'
-                  ? 'grid-cols-1 lg:grid-cols-2'
-                  : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+                ? 'grid-cols-1 lg:grid-cols-2'
+                : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
                 }`}>
                 {section.actions.map((action: QuickAction, index: number) =>
                   renderActionCard(action, index, section.id !== 'recommended')
