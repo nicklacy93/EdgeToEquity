@@ -2,11 +2,19 @@
     "name": "edge-to-equity-next",
     "version": "0.1.0",
     "private": true,
+    "packageManager": "pnpm@8.15.8",
+    "engines": {
+        "node": ">=20 <21"
+    },
     "scripts": {
+        "clean": "rimraf node_modules .next && node -e \"try{require('fs').unlinkSync('package-lock.json')}catch{};try{require('fs').unlinkSync('yarn.lock')}catch{}\"",
+        "reinstall": "pnpm install",
         "dev": "next dev",
         "build": "next build",
         "start": "next start",
-        "lint": "next lint"
+        "lint": "next lint",
+        "typecheck": "tsc --noEmit",
+        "doctor": "node scripts/dev-doctor.js"
     },
     "dependencies": {
         "@anthropic-ai/sdk": "^0.55.1",
@@ -24,13 +32,15 @@
         "@types/react": "^18",
         "@types/react-dom": "^18",
         "autoprefixer": "^10",
+        "axios": "^1.11.0",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
+        "fast-json-patch": "^3.1.1",
         "framer-motion": "^12.23.0",
         "jsonwebtoken": "^9.0.2",
         "lucide-react": "^0.525.0",
         "next": "15.3.4",
-        "openai": "^5.8.2",
+        "openai": "^5.19.1",
         "postcss": "^8",
         "react": "^18",
         "react-dom": "^18",
@@ -38,10 +48,13 @@
         "tailwind-merge": "^3.3.1",
         "tailwindcss": "^3",
         "tailwindcss-animate": "^1.0.7",
-        "typescript": "^5"
+        "typescript": "^5",
+        "zod": "^3.25.76",
+        "zustand": "^5.0.8"
     },
     "devDependencies": {
         "eslint": "^8",
-        "eslint-config-next": "15.3.4"
+        "eslint-config-next": "15.3.4",
+        "rimraf": "^5.0.5"
     }
 }

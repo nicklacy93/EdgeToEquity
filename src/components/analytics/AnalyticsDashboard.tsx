@@ -20,7 +20,7 @@ export function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) {
   const loadStats = async () => {
     try {
       setRefreshing(true);
-      
+
       // Load system stats
       const systemResponse = await fetch('/api/ai');
       const systemData = await systemResponse.json();
@@ -51,8 +51,8 @@ export function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-lg">Loading analytics...</motion.div>
-      </motion.div>
+        <div className="text-lg">Loading analytics...</div>
+      </div>
     );
   }
 
@@ -64,14 +64,14 @@ export function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) {
       {/* Header */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">EdgeToEquity Analytics</h2>
-        <Button 
-          onClick={loadStats} 
+        <Button
+          onClick={loadStats}
           disabled={refreshing}
           variant="outline"
         >
           {refreshing ? 'Refreshing...' : 'Refresh'}
         </Button>
-      </motion.div>
+      </div>
 
       {/* System Overview */}
       {systemStats && (
@@ -88,11 +88,10 @@ export function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) {
                 of $150.00 budget
               </p>
               <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                <div 
-                  className={`h-2 rounded-full ${
-                    budgetUsedPercentage > 90 ? 'bg-red-500' :
-                    budgetUsedPercentage > 70 ? 'bg-yellow-500' : 'bg-green-500'
-                  }`}
+                <div
+                  className={`h-2 rounded-full ${budgetUsedPercentage > 90 ? 'bg-red-500' :
+                      budgetUsedPercentage > 70 ? 'bg-yellow-500' : 'bg-green-500'
+                    }`}
                   style={{ width: `${Math.min(budgetUsedPercentage, 100)}%` }}
                 />
               </motion.div>
@@ -264,7 +263,7 @@ export function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) {
               </CardContent>
             </Card>
           )}
-          
+
           {budgetUsedPercentage > 70 && budgetUsedPercentage <= 90 && (
             <Card className="border-yellow-500 bg-yellow-50">
               <CardContent className="pt-4">

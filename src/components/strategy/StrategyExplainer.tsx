@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion/client';
+import { motion, AnimatePresence } from 'framer-motion';
 import { fetchStrategyAgent } from "@/utils/fetchStrategyAgent";
 import { useStrategyStore } from "@/store/useStrategyStore";
 import {

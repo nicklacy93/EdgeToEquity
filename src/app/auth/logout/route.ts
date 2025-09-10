@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
-function clearAuthCookie() {
+async function clearAuthCookie() {
   // Mirror the attributes you used when setting the cookie
-  cookies().set({
+  const cookieStore = await cookies();
+  cookieStore.set({
     name: 'auth-token',
     value: '',
     maxAge: 0,
@@ -16,11 +17,11 @@ function clearAuthCookie() {
 
 // Support both GET (from <Link/>) and POST (from <form/>)
 export async function GET(request: Request) {
-  clearAuthCookie();
+  await clearAuthCookie();
   return NextResponse.redirect(new URL('/auth/login?signedout=1', request.url));
 }
 
 export async function POST(request: Request) {
-  clearAuthCookie();
+  await clearAuthCookie();
   return NextResponse.redirect(new URL('/auth/login?signedout=1', request.url));
 }

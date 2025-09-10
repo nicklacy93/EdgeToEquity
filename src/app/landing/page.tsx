@@ -2,7 +2,6 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import FloatingChat from '@/components/FloatingChat';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { AuthProvider } from '@/context/AuthContext'; // Add this line
