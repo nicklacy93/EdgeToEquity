@@ -46,7 +46,7 @@ export default function InteractiveActivity({ activities }: InteractiveActivityP
           key={index}
           whileHover={{ x: 6, backgroundColor: "rgba(255,255,255,0.05)" }}
           onClick={() => handleClick(activity.tradeId)}
-          className={\`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200 \${moodHover[mood]}\`}
+          className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200 ${moodHover[mood]}`}
         >
           <div className="text-white/70">
             <ArrowRight className="w-4 h-4" />

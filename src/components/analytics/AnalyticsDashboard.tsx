@@ -83,7 +83,7 @@ export function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) {
             <CardContent>
               <div className="text-2xl font-bold">
                 ${systemStats.totalCost.toFixed(4)}
-              </motion.div>
+              </div>
               <p className="text-xs text-muted-foreground">
                 of $150.00 budget
               </p>
