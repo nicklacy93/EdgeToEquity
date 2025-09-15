@@ -1,0 +1,24 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "exactOptionalPropertyTypes": true
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "src/components/analytics/AnalyticsDashboard.tsx",
+    "src/components/EdgeBot/ChatMessageThread.tsx",
+    "src/components/EdgeBot/hooks/useChatHistory.ts",
+    "src/components/EdgeBot/SuggestionCard.tsx",
+    "src/components/TradeJournal/TradeJournalAgent.tsx",
+    "src/hooks/useAgentMemory.ts",
+    "src/hooks/useChatHistory.ts",
+    "src/hooks/useSessionMetadata.ts",
+    "src/utils/aiApi.ts",
+    "src/utils/chatExportUtils.ts"
+  ]
+}
