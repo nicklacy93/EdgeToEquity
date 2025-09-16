@@ -52,3 +52,5 @@ coverage/
 !.env.example
 .env.local
 .env.*.local
+
+hook-ran.txt
