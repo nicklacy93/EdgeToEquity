@@ -1,6 +1,6 @@
 'use client';
 import { useEffect } from 'react';
-import ErrorFallback from '@/components/ErrorFallback';
+// import ErrorFallback from '@/components/ErrorFallback';
 
 export default function Error({ error, reset }: { error: Error; reset: () => void }) {
   useEffect(() => {
@@ -8,5 +8,5 @@ export default function Error({ error, reset }: { error: Error; reset: () => voi
     console.error('[App Error]', error);
   }, [error]);
 
-  return <ErrorFallback error={error} resetErrorBoundary={reset} />;
+  return <div>Error occurred</div>;
 }

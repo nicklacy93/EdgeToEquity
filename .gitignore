@@ -46,3 +46,9 @@ out/
 dist/
 coverage/
 *.log
+# Environment files
+.env
+.env.*
+!.env.example
+.env.local
+.env.*.local

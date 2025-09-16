@@ -1,25 +1,76 @@
 import type { StrategySpec } from "@/types/strategy";
 
 export function compileToTS(spec: StrategySpec): { code: string; diagnostics: string[] } {
-  const diagnostics: string[] = [];
-  if (!spec.entries.length) diagnostics.push("No entry rules");
-  if (!spec.exits.length) diagnostics.push("No exit rules");
+    const diagnostics: string[] = [];
 
-  const header = `// Generated from StrategySpec v1
-// name: ${spec.name} (rev ${spec.revision})
-`;
+    // Basic validation
+    if (spec.entries.length === 0) {
+        diagnostics.push("Warning: No entry rules defined");
+    }
 
-  const indicators = spec.indicators.map(i => `// ${i.id}: ${i.kind} ${JSON.stringify(i.params)}`).join("\n");
+    if (spec.exits.length === 0) {
+        diagnostics.push("Warning: No exit rules defined");
+    }
 
-  const body = `
-export function run(inputs:{ close:number[] }) {
-  const N = inputs.close.length;
-  if (N < 10) return { ok:false, reason:"insufficient data" };
-  // TODO: Replace with real engine in Part 3
-  const signals = { entries: [], exits: [] };
-  return { ok:true, signals };
+    // Generate TypeScript code stub
+    const code = `// Generated strategy: ${spec.name}
+// Version: ${spec.version}, Revision: ${spec.revision}
+// Generated at: ${new Date().toISOString()}
+
+interface StrategyConfig {
+  symbols: string[];
+  timeframe: string;
+  indicators: any[];
+  entries: any[];
+  exits: any[];
+  risk: any;
 }
+
+const config: StrategyConfig = {
+  symbols: ${JSON.stringify(spec.symbols, null, 2)},
+  timeframe: "${spec.timeframe}",
+  indicators: ${JSON.stringify(spec.indicators, null, 2)},
+  entries: ${JSON.stringify(spec.entries, null, 2)},
+  exits: ${JSON.stringify(spec.exits, null, 2)},
+  risk: ${JSON.stringify(spec.risk, null, 2)},
+};
+
+// TODO: Implement actual strategy logic
+export class ${spec.name.replace(/[^a-zA-Z0-9]/g, '')}Strategy {
+  private config: StrategyConfig;
+  
+  constructor() {
+    this.config = config;
+  }
+  
+  // Entry logic
+  checkEntries(data: any): boolean {
+    // TODO: Implement entry conditions
+    return false;
+  }
+  
+  // Exit logic
+  checkExits(data: any): boolean {
+    // TODO: Implement exit conditions
+    return false;
+  }
+  
+  // Risk management
+  calculatePositionSize(): number {
+    return this.config.risk.maxPositionSize;
+  }
+  
+  calculateStopLoss(): number {
+    return this.config.risk.stopLoss;
+  }
+  
+  calculateTakeProfit(): number | null {
+    return this.config.risk.takeProfit || null;
+  }
+}
+
+export default ${spec.name.replace(/[^a-zA-Z0-9]/g, '')}Strategy;
 `;
 
-  return { code: header + indicators + "\n" + body, diagnostics };
+    return { code, diagnostics };
 }

@@ -1,36 +1,61 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { StrategySpec as SpecSchema } from "@/types/strategy";
 import { jsonOnly, SYS_ARCHITECT } from "@/lib/llm";
 
-export async function POST(req: Request) {
-  const { content, kind } = await req.json() as { content: string; kind: "json"|"pine"|"brief" };
-  if (kind === "json") {
-    const parsed = SpecSchema.parse(JSON.parse(content));
-    return NextResponse.json({ ok: true, spec: parsed, source: "upload:json" });
-  }
-  if (kind === "brief") {
-    const raw = await jsonOnly("gpt-4o-mini", SYS_ARCHITECT, `
-Return StrategySpec JSON (version "v1") for this brief (JSON only):
-${content}
-SCHEMA:
-${SpecSchema.toString()}
-`.trim());
-    const parsed = SpecSchema.parse(JSON.parse(raw));
-    parsed.meta = { ...(parsed.meta ?? {}), source: "upload:brief" };
-    return NextResponse.json({ ok: true, spec: parsed, source: "upload:brief" });
-  }
-  // pine
-  const raw = await jsonOnly("gpt-4o-mini", SYS_ARCHITECT, `
-Extract a StrategySpec JSON ONLY (no code, no prose) from this Pine Script.
-Map ta.sma/ta.ema/ta.rsi/ta.atr/macd to indicators SMA/EMA/RSI/ATR/MACD with reasonable params.
-If exits/entries are ambiguous, infer simplest consistent rules.
-SCHEMA:
-${SpecSchema.toString()}
+const ImportRequest = z.object({
+    kind: z.enum(["json", "pine", "brief"]),
+    content: z.string().min(1),
+});
 
-PINE:
-${content.slice(0, 20000)}
-`.trim());
-  const parsed = SpecSchema.parse(JSON.parse(raw));
-  parsed.meta = { ...(parsed.meta ?? {}), source: "upload:pine" };
-  return NextResponse.json({ ok: true, spec: parsed, source: "upload:pine" });
+export async function POST(req: Request) {
+    try {
+        const body = await req.json();
+        const { kind, content } = ImportRequest.parse(body);
+
+        if (!content) {
+            return NextResponse.json(
+                { ok: false, error: "Content is required" },
+                { status: 400 }
+            );
+        }
+
+        let spec: any;
+
+        if (kind === "json") {
+            // Direct JSON import
+            try {
+                spec = JSON.parse(content);
+            } catch (error) {
+                return NextResponse.json(
+                    { ok: false, error: "Invalid JSON content" },
+                    { status: 400 }
+                );
+            }
+        } else if (kind === "pine") {
+            // Convert Pine Script to StrategySpec
+            const userPrompt = `Convert this Pine Script to a StrategySpec: ${content}`;
+            spec = await jsonOnly("gpt-4o-mini", SYS_ARCHITECT, userPrompt);
+        } else if (kind === "brief") {
+            // Generate from brief
+            const userPrompt = `Create a trading strategy based on this brief: ${content}`;
+            spec = await jsonOnly("gpt-4o-mini", SYS_ARCHITECT, userPrompt);
+        } else {
+            return NextResponse.json(
+                { ok: false, error: "Invalid import kind" },
+                { status: 400 }
+            );
+        }
+
+        // Validate the result
+        const validatedSpec = SpecSchema.parse(spec);
+
+        return NextResponse.json({ ok: true, spec: validatedSpec });
+    } catch (error) {
+        console.error("Import strategy error:", error);
+        return NextResponse.json(
+            { ok: false, error: "Failed to import strategy" },
+            { status: 500 }
+        );
+    }
 }
