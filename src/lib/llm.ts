@@ -4,6 +4,14 @@ export const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY!,
 });
 
+export function getOpenAI() {
+    const key = process.env.OPENAI_API_KEY;
+    if (!key || key.trim().length < 20) {
+        throw new Error('Missing OPENAI_API_KEY');
+    }
+    return new OpenAI({ apiKey: key });
+}
+
 export async function jsonOnly(
     model: string,
     system: string,

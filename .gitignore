@@ -54,3 +54,8 @@ coverage/
 .env.*.local
 
 hook-ran.txt
+
+# local copies / quarantine
+src/components/strategy/src/**
+src/components_broken_backup_*/**
+temp-quarantine/**
